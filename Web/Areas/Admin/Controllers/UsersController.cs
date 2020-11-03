@@ -442,7 +442,7 @@ namespace Web.Areas.Admin.Controllers
             var result = db.Users.SingleOrDefault(x => x.UserId == id);
             return Json(result, JsonRequestBehavior.AllowGet);
         }
-        public async Task<JsonResult> ChangeStatus(User u)
+        public async Task<JsonResult> ChangeStatusSuccess(User u)
         {
             db.Configuration.ProxyCreationEnabled = false;
             var data = await db.Users.SingleOrDefaultAsync(x => x.UserId == u.UserId);

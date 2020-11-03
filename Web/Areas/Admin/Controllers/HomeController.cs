@@ -143,13 +143,12 @@ namespace Web.Areas.Admin.Controllers
         {
             return PartialView("_InfoUserTopRight");
         }
-        public async Task<PartialViewResult> NotificationsAsync()
+        public PartialViewResult Notifications()
         {
-
-            var notiFeedback = await db.Feedbacks.Where(x => x.Status == 0).Take(4).ToListAsync();
-            ViewBag.coutPenddingFeedback = await db.Feedbacks.Where(x => x.Status == 0).CountAsync();
-            ViewBag.Orders = await db.Orders.Where(x => x.Status == 0).Take(4).OrderByDescending(x => x.Created).ToListAsync();
-            ViewBag.CountOrders = await db.Orders.Where(x => x.Status == 0).CountAsync();
+            var notiFeedback = db.Feedbacks.Where(x => x.Status == 0).Take(4).ToList();
+            ViewBag.coutPenddingFeedback = db.Feedbacks.Where(x => x.Status == 0).Count();
+            ViewBag.Orders = db.Orders.Where(x => x.Status == 0).Take(4).OrderByDescending(x => x.Created).ToList();
+            ViewBag.CountOrders = db.Orders.Where(x => x.Status == 0).Count();
             return PartialView("_Notifications", notiFeedback);
         }
         #endregion

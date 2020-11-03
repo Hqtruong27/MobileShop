@@ -181,7 +181,7 @@
                 var data = $("#submitform").serialize();
                 $.ajax({
                     type: "POST",
-                    url: "@Url.Action("ChaneStatusSuccess", "Users")",
+                    url: "@Url.Action("ChangeStatusSuccess", "Users")",
                     data: data,
                     dataType: "JSON",
                     success: function (res) {

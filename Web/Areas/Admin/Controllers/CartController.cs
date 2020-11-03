@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -19,11 +20,10 @@ namespace Web.Areas.Admin.Controllers
         {
             return View();
         }
-        
+
         public JsonResult Getdata(string isvk)
         {
-            var orders = from o in db.Orders
-                         select o;
+            var orders = from o in db.Orders select o;
             switch (isvk)
             {
                 case "canceled":
@@ -42,16 +42,16 @@ namespace Web.Areas.Admin.Controllers
                     orders = db.Orders;
                     break;
             }
-            return Json(orders.ToList(), JsonRequestBehavior.AllowGet);
+            return Json(orders, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Detail(int? id)
+        public async Task<ActionResult> Detail(int? id)
         {
             if (id == null)
             {
                 return View("Unauthorized");
             }
-            var order = db.Orders.Include(x => x.OrderDetails).FirstOrDefault(x => x.OrderId == id);
+            var order = await db.Orders.Include(x => x.OrderDetails).FirstOrDefaultAsync(x => x.OrderId == id);
             if (order == null)
             {
                 return View("Unauthorized");
@@ -59,28 +59,29 @@ namespace Web.Areas.Admin.Controllers
             return View(order);
         }
         [HttpPost]
-        public JsonResult GetId(int id)
+        public async Task<JsonResult> GetId(int id)
         {
-            var order = db.Orders.Where(x => x.OrderId == id).FirstOrDefault();
+            var order = await db.Orders.Where(x => x.OrderId == id).FirstOrDefaultAsync();
+            if (order == null)
+            {
+                return Json(new { error = "Not found Order" }, JsonRequestBehavior.AllowGet);
+            }
             return Json(order, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
         #region Change Status Order
         [HttpPost]
-        public JsonResult ChangeStatusOrder(Order order)
+        public async Task<JsonResult> ChangeStatusOrder(Order order)
         {
-            var dbOrder = db.Orders.Where(x => x.OrderId == order.OrderId).FirstOrDefault();
+            var dbOrder = await db.Orders.Where(x => x.OrderId == order.OrderId).FirstOrDefaultAsync();
             if (dbOrder != null)
             {
                 dbOrder.Status = order.Status;
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Cập nhập trạng thái thành công !" }, JsonRequestBehavior.AllowGet);
             }
-            else
-            {
-                return Json(new { error = "Có gì đó không đúng !" }, JsonRequestBehavior.AllowGet);
-            }
+            return Json(new { error = "Không tìm thấy Order !" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
     }

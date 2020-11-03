@@ -4,15 +4,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 
 namespace Models.ViewModels
 {
+    #region Customer View Model
     //Customer
-    //Register and login Viewmodel Customer
+    //Register and login Viewmodel Customer.....
     public class CustomerViewModel
     {
         [Required(ErrorMessage = "Vui lòng nhập Họ Tên")]
@@ -82,7 +79,9 @@ namespace Models.ViewModels
         [Required]
         public string ResetCode { get; set; }
     }
+    #endregion
 
+    #region Product View Model
     //Admin
     /// <summary>
     /// Product Create View Models
@@ -129,7 +128,9 @@ namespace Models.ViewModels
         public bool? Status { get; set; }
         public virtual ICollection<ProductAttr> ProductAttrs { get; set; }
     }
+    #endregion
 
+    #region User View Model
     /// <summary>
     /// Login, create and Edit Users
     /// </summary>
@@ -160,7 +161,7 @@ namespace Models.ViewModels
     }
     public class CreateUser
     {
-        [Required(ErrorMessage ="Vui lòng nhập họ và tên")]
+        [Required(ErrorMessage = "Vui lòng nhập họ và tên")]
         public string FullName { get; set; }
         [Required(ErrorMessage = "Vui lòng nhập địa chỉ email")]
         public string Email { get; set; }
@@ -183,13 +184,16 @@ namespace Models.ViewModels
     }
     public class ChangePassword
     {
-        
+
         public string Password { get; set; }
-        
+
         public string NewPassword { get; set; }
-        
+
         public string ConfirmPassword { get; set; }
     }
+    #endregion
+
+    #region Category View Model
     public class CreateCategories
     {
         public string CategoryName { get; set; }
@@ -198,7 +202,9 @@ namespace Models.ViewModels
         public int? ParentId { get; set; }
         public int? CategoryId { get; set; }
     }
+    #endregion
 
+    #region User Join Group
     /// <summary>
     /// Table User Join Table groups
     /// </summary>
@@ -222,7 +228,9 @@ namespace Models.ViewModels
 
         public string GroupId { get; set; }
     }
+    #endregion
 
+    #region Table typeAttr Join Table Attribute
     //Table typeAttr Join Table Attribute
     public class AttributeJoinTypeAttr
     {
@@ -232,7 +240,9 @@ namespace Models.ViewModels
         public string Value { get; set; }
         public byte Status { get; set; }
     }
+    #endregion
 
+    #region List News Join admin get Name admin
     //List News Join admin get Name admin
     public class NewsJoinAdmin
     {
@@ -262,8 +272,9 @@ namespace Models.ViewModels
 
         public string FullName { get; set; }
     }
+    #endregion
 
-
+    # region Chart data
     //Chart data
     public class ChartData
     {
@@ -280,6 +291,6 @@ namespace Models.ViewModels
         }
         public int Total { get; set; }
         public double TotalPrice { get; set; }
-
     }
+    #endregion
 }

@@ -3,9 +3,11 @@ using Models.Models.DataModels;
 using Models.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
@@ -32,13 +34,13 @@ namespace Web.Areas.Admin.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(UserLogin user)
+        public async Task<ActionResult> Login(UserLogin user)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var checkLogin = db.Users.SingleOrDefault(x => x.Email == user.Email);
+                    var checkLogin = await db.Users.SingleOrDefaultAsync(x => x.Email == user.Email);
                     if (checkLogin != null)
                     {
                         bool checkpwd = BCrypt.Net.BCrypt.Verify(user.Password, checkLogin.Password);
@@ -79,15 +81,9 @@ namespace Web.Areas.Admin.Controllers
                         {
                             ModelState.AddModelError("CheckLogin", "Tài khoản của bạn tạm thời đã bị khoá, liên hệ admin để được hỗ trợ");
                         }
-                        else
-                        {
-                            ModelState.AddModelError("CheckLogin", "Email hoặc khẩu không chính xác !");
-                        }
-                    }
-                    else
-                    {
                         ModelState.AddModelError("CheckLogin", "Email hoặc khẩu không chính xác !");
                     }
+                    ModelState.AddModelError("CheckLogin", "Email hoặc khẩu không chính xác !");
                 }
                 catch (Exception)
                 {
@@ -168,11 +164,11 @@ namespace Web.Areas.Admin.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public ActionResult ForgotPassword(string email)
+        public async Task<ActionResult> ForgotPassword(string email)
         {
             string success = "";
             string error = "";
-            var emailUser = db.Users.Where(x => x.Email == email).SingleOrDefault();
+            var emailUser = await db.Users.Where(x => x.Email == email).SingleOrDefaultAsync();
             if (emailUser != null)
             {
                 ///Send email for reser pwd
@@ -180,13 +176,10 @@ namespace Web.Areas.Admin.Controllers
                 VerifyLinkEmail(emailUser.Email, resetCode, "ResetPassword");
                 emailUser.ResetPasswordCode = resetCode;
                 db.Configuration.ValidateOnSaveEnabled = false;
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 success = "Một email đã được gửi đến hộp thư của bạn, vui lòng kiểm tra hộp thư đến trong Email";
             }
-            else
-            {
-                error = "Email chưa được đăng ký";
-            }
+            error = "Email chưa được đăng ký";
             ViewBag.success = success;
             ViewBag.error = error;
             return View();
@@ -196,24 +189,16 @@ namespace Web.Areas.Admin.Controllers
         #region Reset Password
         // POST: Admin/Users/reset pwd
         [AllowAnonymous]
-        public ActionResult ResetPassword(string id)
+        public async Task<ActionResult> ResetPassword(string id)
         {
-            if (id == null)
-            {
-                return View("Unauthorized");
-            }
+            if (id == null) return View("Unauthorized");
             //verify the reset password link
-            var result = db.Users.Where(x => x.ResetPasswordCode == id).FirstOrDefault();
-            if (result != null)
-            {
-                ResetPasswordModel m = new ResetPasswordModel();
-                m.ResetCode = id;
-                return View(m);
-            }
-            else
-            {
-                return View("Unauthorized");
-            }
+            var result = await db.Users.Where(x => x.ResetPasswordCode == id).FirstOrDefaultAsync();
+            if (result == null) return View("Unauthorized");
+            ResetPasswordModel m = new ResetPasswordModel();
+            m.ResetCode = id;
+            return View(m);
+
         }
         [HttpPost]
         [AllowAnonymous]
@@ -241,17 +226,17 @@ namespace Web.Areas.Admin.Controllers
         #region Change Password
         [HttpPost]
         [CustomAuth]
-        public ActionResult ChangePassword(ChangePassword changepwd)
+        public async Task<ActionResult> ChangePassword(ChangePassword changepwd)
         {
             var curentUser = (User)HttpContext.Session["User"]; // sesin current user
             if (curentUser == null)
             {
                 return Json(new { error = "Vui lòng đăng nhập lại" }, JsonRequestBehavior.AllowGet);
             }
-            var user = db.Users.FirstOrDefault(x => x.UserId == curentUser.UserId);
+            var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == curentUser.UserId);
             if (user != null)
             {
-                var encodingPwd = BCrypt.Net.BCrypt.Verify(changepwd.Password,user.Password);
+                var encodingPwd = BCrypt.Net.BCrypt.Verify(changepwd.Password, user.Password);
                 if (!encodingPwd)
                 {
                     return Json(new { error = "Mật khẩu cũ không đúng" }, JsonRequestBehavior.AllowGet);
@@ -261,7 +246,7 @@ namespace Web.Areas.Admin.Controllers
                     return Json(new { error = "Mật khẩu mới không khớp" }, JsonRequestBehavior.AllowGet);
                 }
                 user.Password = BCrypt.Net.BCrypt.HashPassword(changepwd.NewPassword);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Thay đổi mật khẩu thành công !!" }, JsonRequestBehavior.AllowGet);
             }
             return Json(new { error = "Vui lòng đăng nhập lại" }, JsonRequestBehavior.AllowGet);
@@ -271,14 +256,14 @@ namespace Web.Areas.Admin.Controllers
         #region Info User, Change Info User
         // POST: Admin/Users/ Information current user
         [CustomAuth]
-        public ActionResult Index(string userName)
+        public async Task<ActionResult> Index(string userName)
         {
             var InfoUser = (User)HttpContext.Session["User"];
             if (InfoUser == null)
             {
                 return View("Unauthorized");
             }
-            return View(db.Users.Find(InfoUser.UserId));
+            return View(await db.Users.FindAsync(InfoUser.UserId));
         }
         [HttpPost]
         [CustomAuth]
@@ -381,10 +366,10 @@ namespace Web.Areas.Admin.Controllers
 
         #region Create User
         // POST: Admin/Users/Create users
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
-            var countGroupId = db.Groups.Where(x => x.isAdmin == false && x.Status == 1).Count();
-            ViewBag.GroupId = new SelectList(db.Groups.Where(x => x.isAdmin == false && x.Status == 1), "GroupId", "GroupName");
+            var countGroupId = await db.Groups.Where(x => x.isAdmin == false && x.Status == 1).CountAsync();
+            ViewBag.GroupId = new SelectList(await db.Groups.Where(x => x.isAdmin == false && x.Status == 1).ToListAsync(), "GroupId", "GroupName");
             if (countGroupId == 0)
             {
                 setAlert("Error !", "vui lòng thêm mới vai trò trước khi thêmm mới nhân viên !!", "top-right", "error", 7000);
@@ -394,15 +379,14 @@ namespace Web.Areas.Admin.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(CreateUser c)
+        public async Task<ActionResult> Create(CreateUser c)
         {
-            var countGroupId = db.Groups.Where(x => x.isAdmin == false && x.Status == 1).Count();
+            var countGroupId = await db.Groups.Where(x => x.isAdmin == false && x.Status == 1).CountAsync();
             if (countGroupId == 0)
             {
                 setAlert("Error !", "Vui lòng thêm mới vai trò trước khi thêmm mới nhân viên !!", "top-right", "error", 7000);
                 return RedirectToAction("Index", "Groups");
             }
-            ViewBag.GroupId = new SelectList(db.Groups.Where(x => x.isAdmin == false), "GroupId", "GroupName");
             if (ModelState.IsValid)
             {
                 try
@@ -416,7 +400,7 @@ namespace Web.Areas.Admin.Controllers
                     u.Status = 1;
                     u.GroupId = c.GroupId;
                     db.Users.Add(u);
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                     return RedirectToAction("UserManager", "Users");
                 }
                 catch (Exception)
@@ -425,6 +409,7 @@ namespace Web.Areas.Admin.Controllers
                     return View(c);
                 }
             }
+            ViewBag.GroupId = new SelectList(await db.Groups.Where(x => x.isAdmin == false).ToListAsync(), "GroupId", "GroupName");
             return View(c);
         }
         #endregion
@@ -457,30 +442,31 @@ namespace Web.Areas.Admin.Controllers
             var result = db.Users.SingleOrDefault(x => x.UserId == id);
             return Json(result, JsonRequestBehavior.AllowGet);
         }
-        public JsonResult ChaneStatusSuccess(User u)
+        public async Task<JsonResult> ChangeStatus(User u)
         {
             db.Configuration.ProxyCreationEnabled = false;
-            var data = db.Users.SingleOrDefault(x => x.UserId == u.UserId);
+            var data = await db.Users.SingleOrDefaultAsync(x => x.UserId == u.UserId);
             if (data != null)
             {
                 data.Status = u.Status;
                 data.GroupId = u.GroupId;
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
             return Json(new { data, success = "Cập nhập thành công !" }, JsonRequestBehavior.AllowGet);
         }
 
         // JSON: Admin/Users/delete user
         [HttpPost]
-        public JsonResult DeleteUsers(int id)
+        public async Task<JsonResult> DeleteUsers(int id)
         {
-            var result = db.Users.SingleOrDefault(x => x.UserId == id);
+            var result = await db.Users.SingleOrDefaultAsync(x => x.UserId == id);
             if (result != null)
             {
                 result.mStatus = 10;
-                db.SaveChanges();
+                await db.SaveChangesAsync();
+                return Json(new { success = "Xoá thành công !" }, JsonRequestBehavior.AllowGet);
             }
-            return Json(new { success = "Xoá thành công !" }, JsonRequestBehavior.AllowGet);
+            return Json(new { error = "Không tìm thấy User !" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
     }

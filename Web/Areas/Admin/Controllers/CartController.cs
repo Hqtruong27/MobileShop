@@ -14,6 +14,7 @@ namespace Web.Areas.Admin.Controllers
     {
         MobileShopContext db = new MobileShopContext();
         // GET: Admin/Get All Cart
+        #region List Orders, detail
         public ActionResult Index()
         {
             return View();
@@ -63,7 +64,9 @@ namespace Web.Areas.Admin.Controllers
             var order = db.Orders.Where(x => x.OrderId == id).FirstOrDefault();
             return Json(order, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region Change Status Order
         [HttpPost]
         public JsonResult ChangeStatusOrder(Order order)
         {
@@ -79,5 +82,6 @@ namespace Web.Areas.Admin.Controllers
                 return Json(new { error = "Có gì đó không đúng !" }, JsonRequestBehavior.AllowGet);
             }
         }
+        #endregion
     }
 }

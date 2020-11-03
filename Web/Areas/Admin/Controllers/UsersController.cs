@@ -18,13 +18,9 @@ namespace Web.Areas.Admin.Controllers
     public class UsersController : BaseController
     {
         MobileShopContext db = new MobileShopContext();
-        // GET: Admin/Users for Users
-        /// <summary>
-        /// Action Login and logout Users
-        /// </summary>
-        /// <returns></returns>
-        /// 
 
+        #region Login User
+        // GET: Admin/Users for Users
         public ActionResult Login()
         {
             if (Session["User"] != null)
@@ -101,6 +97,9 @@ namespace Web.Areas.Admin.Controllers
             }
             return View(user);
         }
+        #endregion
+
+        #region Logout User
         public ActionResult Logout()
         {
             if (HttpContext.Session["User"] != null)
@@ -127,7 +126,9 @@ namespace Web.Areas.Admin.Controllers
             }
             return RedirectToAction("Logout", "Users");
         }
+        #endregion
 
+        #region Send Email
         //send email (non Action)
         [NonAction]
         public void VerifyLinkEmail(string email, string activeCode, string emailFor)
@@ -155,7 +156,9 @@ namespace Web.Areas.Admin.Controllers
             smpt.Send(message);
 
         }
+        #endregion
 
+        #region ForgotPassword
         // POST: Admin/Users/forgot pwd
         [AllowAnonymous]
         public ActionResult ForgotPassword()
@@ -188,7 +191,9 @@ namespace Web.Areas.Admin.Controllers
             ViewBag.error = error;
             return View();
         }
+        #endregion
 
+        #region Reset Password
         // POST: Admin/Users/reset pwd
         [AllowAnonymous]
         public ActionResult ResetPassword(string id)
@@ -231,7 +236,9 @@ namespace Web.Areas.Admin.Controllers
             ViewBag.success = success;
             return View(m);
         }
+        #endregion
 
+        #region Change Password
         [HttpPost]
         [CustomAuth]
         public ActionResult ChangePassword(ChangePassword changepwd)
@@ -259,7 +266,9 @@ namespace Web.Areas.Admin.Controllers
             }
             return Json(new { error = "Vui lòng đăng nhập lại" }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region Info User, Change Info User
         // POST: Admin/Users/ Information current user
         [CustomAuth]
         public ActionResult Index(string userName)
@@ -306,7 +315,6 @@ namespace Web.Areas.Admin.Controllers
                 var current = db.Users.Find(session.UserId);
                 current.UserName = u.UserName;
                 current.FullName = u.FullName;
-                current.Email = u.Email;
                 current.Phone = u.Phone;
                 if (imageUpload != null)
                 {
@@ -335,7 +343,9 @@ namespace Web.Areas.Admin.Controllers
             loggedInUsers.Add(curentUser);
             return Json(new { error = "Không thể chỉnh sửa thông tin !!", JsonRequestBehavior.AllowGet });
         }
+        #endregion
 
+        #region List Users
         //ManagerAdmin
         //JSON: Admin/Users/getall User
         [CustomAuth]
@@ -367,7 +377,9 @@ namespace Web.Areas.Admin.Controllers
                           }).AsEnumerable();
             return Json(new { data = result }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region Create User
         // POST: Admin/Users/Create users
         public ActionResult Create()
         {
@@ -415,6 +427,9 @@ namespace Web.Areas.Admin.Controllers
             }
             return View(c);
         }
+        #endregion
+
+        #region Change Status, Delete Users
         // POST: Do not use
         //public ActionResult Edit(int id)
         //{
@@ -467,5 +482,6 @@ namespace Web.Areas.Admin.Controllers
             }
             return Json(new { success = "Xoá thành công !" }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
     }
 }

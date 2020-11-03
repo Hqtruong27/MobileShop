@@ -14,6 +14,7 @@ namespace Web.Areas.Admin.Controllers
     {
         MobileShopContext db = new MobileShopContext();
         // GET: Admin/News
+        #region Newss
         public ActionResult Index()
         {
             return View();
@@ -41,7 +42,9 @@ namespace Web.Areas.Admin.Controllers
 
             return Json(new { data = news }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region Create News
         //GET: Admin/Create News
         public ActionResult Create()
         {
@@ -79,6 +82,9 @@ namespace Web.Areas.Admin.Controllers
             }
             return View(news);
         }
+        #endregion
+
+        #region Update News
         //GET: Admin/Edit News
         public ActionResult Edit(int? id)
         {
@@ -135,7 +141,9 @@ namespace Web.Areas.Admin.Controllers
             }
             return View(news);
         }
+        #endregion
 
+        #region Delete News
         //JSON: Admin/Delete News
         [HttpPost]
         public JsonResult Delete(int? id)
@@ -158,5 +166,6 @@ namespace Web.Areas.Admin.Controllers
             }
             return Json(new { error = "Không tìm thấy bài viết" }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
     }
 }

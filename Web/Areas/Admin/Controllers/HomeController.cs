@@ -21,6 +21,7 @@ namespace Web.Areas.Admin.Controllers
     {
         MobileShopContext db = new MobileShopContext();
         // GET: Admin/Home
+        #region Home
         public ActionResult Index()
         {
             ViewBag.invoice = db.Orders.Where(x => x.Status == 2).Count();
@@ -29,7 +30,9 @@ namespace Web.Areas.Admin.Controllers
             ViewBag.customers = db.Customers.Where(x => x.Status == 1 || x.Status == 0).Count();
             return View();
         }
+        #endregion
 
+        #region Chart data
         public JsonResult ChartData()
         {
             var orders = db.Orders.Where(x => x.Status == 2).GroupBy(x => new
@@ -45,6 +48,9 @@ namespace Web.Areas.Admin.Controllers
             }).OrderBy(x => x.Year).AsEnumerable();
             return Json(orders, JsonRequestBehavior.AllowGet);
         }
+        #endregion
+
+        #region Feedback, detail, handle feedback
         public ActionResult Feedback()
         {
             return View();
@@ -94,7 +100,9 @@ namespace Web.Areas.Admin.Controllers
                 return Json(new { error = "Có lỗi, vui lòng thử lại" }, JsonRequestBehavior.AllowGet);
             }
         }
+        #endregion
 
+        #region AutoSend
         [HttpPost]
         public JsonResult TestAutoSend()
         {
@@ -121,6 +129,9 @@ namespace Web.Areas.Admin.Controllers
             }
             return Json(new { error = "Không thành công", JsonRequestBehavior.AllowGet });
         }
+        #endregion
+
+        #region partialView
         public PartialViewResult MainLeft()
         {
             var getuser = HttpContext.Session["User"] as User;
@@ -140,5 +151,6 @@ namespace Web.Areas.Admin.Controllers
             ViewBag.CountOrders = db.Orders.Where(x => x.Status == 0).Count();
             return PartialView("_Notifications", notiFeedback);
         }
+        #endregion
     }
 }

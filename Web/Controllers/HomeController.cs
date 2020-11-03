@@ -8,20 +8,23 @@ using Models.Models.DataModels;
 using Web.Areas.Admin.Models;
 using PagedList;
 using System.Web.Helpers;
+using System.Threading.Tasks;
 
 namespace Web.Controllers
 {
     public class HomeController : BaseController
     {
         MobileShopContext db = new MobileShopContext();
+
+        #region Home, MainMenu, Header
         //GET: /Home
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            TempData["ReturnUrl"] = Request.Url.AbsoluteUri;
-            ViewBag.banner = db.Banners.Where(x => x.Status == 1).Take(6).OrderBy(x => x.Orderby).ToList();
-            ViewBag.ProductsNew = db.Products.Where(x => x.Status == true).OrderBy(x => x.CreateDate).Take(8);
-            var providers = db.Providers.Where(x => x.Status == 1).OrderBy(x => x.Orderby).Take(3).ToList();
-            ViewBag.SalePrice = db.Products.Where(x => x.Status == true).OrderBy(x => (x.PriceOut - x.PriceOut * x.Discount / 100)).Take(8).ToList();
+            //TempData["ReturnUrl"] = Request.Url.AbsoluteUri;
+            ViewBag.banner = await db.Banners.Where(x => x.Status == 1).Take(6).OrderBy(x => x.Orderby).ToListAsync();
+            ViewBag.ProductsNew = await db.Products.Where(x => x.Status == true).OrderBy(x => x.CreateDate).Take(8).ToListAsync();
+            var providers = await db.Providers.Where(x => x.Status == 1).OrderBy(x => x.Orderby).Take(3).ToListAsync();
+            ViewBag.SalePrice = await db.Products.Where(x => x.Status == true).OrderBy(x => (x.PriceOut - x.PriceOut * x.Discount / 100)).Take(8).ToListAsync();
             return View(providers);
         }
 
@@ -38,16 +41,18 @@ namespace Web.Controllers
             ViewBag.CountPrice = db.AddToCarts.Where(x => x.CustomerId.ToString() == id).ToList();
             return PartialView("_Header");
         }
+        #endregion
 
+        #region Product
         //GET: /Product by category
-        public ActionResult Products(int? id, string orderby, int page = 1, int pageSize = 12)
+        public async Task<ActionResult> Products(int? id, string orderby, int page = 1, int pageSize = 12)
         {
             if (id == null)
             {
                 return HttpNotFound();
             }
-            var products = from s in db.Products.Where(x => x.Status == true).OrderBy(x => x.CreateDate)
-                           select s;
+            var products =  from p in await db.Products.Where(x => x.Status == true).OrderBy(x => x.CreateDate).ToListAsync()
+                           select p;
             switch (orderby)
             {
                 case "price_asc":
@@ -76,6 +81,9 @@ namespace Web.Controllers
             }
             return View(products.ToPagedList(page, pageSize));
         }
+        #endregion
+
+        #region Provider
         //GET: /Providers by category
         public ActionResult Providers(int? id, string orderby)
         {
@@ -113,6 +121,9 @@ namespace Web.Controllers
             }
             return View(products);
         }
+        #endregion
+
+        #region Product detail, and AddToCart
         //GET: /Product detail
         [AllowAnonymous]
         public ActionResult Productsdetail(int? id)
@@ -230,6 +241,9 @@ namespace Web.Controllers
             }
             return RedirectToAction("Index", "Cart");
         }
+        #endregion
+
+        #region News, New detail
         [AllowAnonymous]
         public ActionResult News(int page = 1, int pageSize = 9)
         {
@@ -247,6 +261,9 @@ namespace Web.Controllers
             News news = db.News.Where(n => n.NewsId == id).FirstOrDefault();
             return View(news);
         }
+        #endregion
+
+        #region Feedback
         public ActionResult Feedback()
         {
             return View();
@@ -274,6 +291,9 @@ namespace Web.Controllers
             }
             return View(feedback);
         }
+        #endregion
+
+        #region Other
         public ActionResult Introduce()
         {
             ViewBag.Message = "Your contact page.";
@@ -288,5 +308,6 @@ namespace Web.Controllers
             ViewBag.ProductSaleQuantity = productSalePrice;
             return PartialView("_Mainleft", productSalePrice);
         }
+        #endregion
     }
 }

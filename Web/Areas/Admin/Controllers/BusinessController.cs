@@ -12,15 +12,12 @@ namespace Web.Areas.Admin.Controllers
     public class BusinessController : Controller
     {
         MobileShopContext db = new MobileShopContext();
+        #region Bussiness
         // GET: Admin/Business
         public ActionResult Index()
         {
             User result = db.Users.SingleOrDefault(x => x.IsAdmin == true);
-            if (result != null)
-            {
-                return View();
-            }
-            return RedirectToAction("Index", "Home");
+            return result == null ? RedirectToAction("Index", "Home") : (ActionResult)View();
         }
         // Json: Admin/Business/getall
         public ActionResult Getdata()
@@ -30,7 +27,9 @@ namespace Web.Areas.Admin.Controllers
             var bus = db.Businesses.Where(x => x.Status == x.Status && x.Status != 3);
             return Json(new { data = bus }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region Update
         // JSON: Admin/Business/Edit
         [HttpPost]
         public ActionResult Edit(string id)
@@ -84,5 +83,6 @@ namespace Web.Areas.Admin.Controllers
             }
             return RedirectToAction("index", "Business");
         }
+        #endregion
     }
 }

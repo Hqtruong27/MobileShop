@@ -14,7 +14,7 @@ namespace Web.Controllers
     public class CategoriesController : Controller
     {
         private MobileShopContext db = new MobileShopContext();
-
+        #region Read
         // GET: Categories
         public ActionResult Index()
         {
@@ -36,7 +36,9 @@ namespace Web.Controllers
             }
             return View(category);
         }
+        #endregion
 
+        #region Create
         // GET: Categories/Create
         public ActionResult Create()
         {
@@ -61,7 +63,9 @@ namespace Web.Controllers
             ViewBag.ParentId = new SelectList(db.Categories, "CategoryId", "CategoryName", category.ParentId);
             return View(category);
         }
+        #endregion
 
+        #region Update
         // GET: Categories/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -94,7 +98,9 @@ namespace Web.Controllers
             ViewBag.ParentId = new SelectList(db.Categories, "CategoryId", "CategoryName", category.ParentId);
             return View(category);
         }
+        #endregion
 
+        #region Delete
         // GET: Categories/Delete/5
         public ActionResult Delete(int? id)
         {
@@ -129,5 +135,6 @@ namespace Web.Controllers
             }
             base.Dispose(disposing);
         }
+        #endregion
     }
 }

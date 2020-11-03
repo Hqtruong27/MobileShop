@@ -11,23 +11,15 @@ using System.Web.Mvc;
 using Web.Areas.Admin.Models;
 using Facebook;
 using System.Configuration;
+using System.Threading.Tasks;
 
 namespace Web.Controllers
 {
     public class UsersController : BaseController
     {
-        private Uri RediredtUri
-        {
-            get
-            {
-                var uriBuilder = new UriBuilder(Request.Url);
-                uriBuilder.Query = null;
-                uriBuilder.Fragment = null;
-                uriBuilder.Path = Url.Action("FacebookCallback");
-                return uriBuilder.Uri;
-            }
-        }
         MobileShopContext db = new MobileShopContext();
+
+        #region Info Customer
         // GET: Users/ information current user
         [CustomersAutherize]
         public ActionResult Index()
@@ -41,19 +33,19 @@ namespace Web.Controllers
         }
         [HttpPost]
         [CustomersAutherize]
-        public ActionResult Index(Customer c, HttpPostedFileBase imageUpload)
+        public async Task<ActionResult> Index(Customer c, HttpPostedFileBase imageUpload)
         {
             HttpCookie cookie = Request.Cookies["InfoCustomer"];
             var id = cookie["id"];
             if (id == null)
             {
-                return HttpNotFound();
+                return HttpNotFound("Cannot find user");
             }
             try
             {
                 if (ModelState.IsValid)
                 {
-                    var current = db.Customers.Find(int.Parse(id));
+                    var current = await db.Customers.FindAsync(int.Parse(id));
                     current.FullName = c.FullName;
                     current.DateofBirth = c.DateofBirth;
                     current.Gender = c.Gender;
@@ -69,7 +61,7 @@ namespace Web.Controllers
                             string fullpath = Path.Combine(Server.MapPath("~/Images/"), filename);
                             current.Avatar = filename;
                             imageUpload.SaveAs(fullpath);
-                            db.SaveChanges();
+                            await db.SaveChangesAsync();
                             cookie["Name"] = current.FullName;
                             cookie["Avatar"] = current.Avatar;
                             Response.Cookies.Add(cookie);
@@ -86,7 +78,7 @@ namespace Web.Controllers
                     }
                     else
                     {
-                        db.SaveChanges();
+                        await db.SaveChangesAsync();
                         cookie["Name"] = current.FullName;
                         cookie["Avatar"] = current.Avatar;
                         Response.Cookies.Add(cookie);
@@ -105,20 +97,22 @@ namespace Web.Controllers
             }
 
         }
+        #endregion
 
+        #region Order, detail
         // GET: Users/ ListOrders
         [CustomersAutherize]
-        public ActionResult Orders()
+        public async Task<ActionResult> Orders()
         {
             if (Request.Cookies["InfoCustomer"] == null)
             {
                 return RedirectToAction("Index", "Home");
             }
             var id = int.Parse(Request.Cookies["InfoCustomer"]["Id"]);
-            return View(db.Orders.Where(o => o.CustomerId == id).Include(x => x.OrderDetails).AsEnumerable());
+            return View(await db.Orders.Where(o => o.CustomerId == id).Include(x => x.OrderDetails).ToListAsync());
         }
         [CustomersAutherize]
-        public ActionResult OrderDetail(string id)
+        public async Task<ActionResult> OrderDetail(string id)
         {
             if (Request.Cookies["InfoCustomer"] == null)
             {
@@ -129,7 +123,7 @@ namespace Web.Controllers
                 return RedirectToAction("Orders");
             }
             var userid = int.Parse(Request.Cookies["InfoCustomer"]["Id"]);
-            Order orders = db.Orders.Where(o => o.CodeOrder == id).Include(o => o.OrderDetails).AsEnumerable().SingleOrDefault();
+            Order orders = await db.Orders.Where(o => o.CodeOrder == id).Include(o => o.OrderDetails).SingleOrDefaultAsync();
             if (orders == null)
             {
                 return RedirectToAction("Orders");
@@ -138,34 +132,20 @@ namespace Web.Controllers
         }
         //JSON: Users/ canceled order
         [HttpPost]
-        public JsonResult CaneledOrder(int id)
+        public async Task<JsonResult> CaneledOrder(int id)
         {
-            var result = db.Orders.Where(o => o.OrderId == id).SingleOrDefault();
-            if (result != null)
-            {
-                if ((result.Status == 0 || result.Status == 1) && result.TimeExpires >= DateTime.Now)
-                {
-                    result.Status = -2;//CaneledOrder with status = -2;
-                    db.SaveChanges();
-                    return Json(new { success = "Huỷ đơn hàng thành công !" }, JsonRequestBehavior.AllowGet);
-                }
-                else
-                {
-                    return Json(new { error = "Bạn không thể huỷ đơn hàng" }, JsonRequestBehavior.AllowGet);
-                }
-            }
-            else
-            {
-                return Json(new { error = "Có gì đó không đúng" }, JsonRequestBehavior.AllowGet);
-            }
-        }
+            var result = await db.Orders.Where(o => o.OrderId == id).SingleOrDefaultAsync();
+            if (result == null) return Json(new { error = "Không tìm thấy đơn hàng này" }, JsonRequestBehavior.AllowGet);
+            if ((result.Status != 0 || result.Status != 1) && result.TimeExpires <= DateTime.Now)
+                return Json(new { error = "Bạn không thể huỷ đơn hàng" }, JsonRequestBehavior.AllowGet);
 
-        [CustomersAutherize]
-        public ActionResult Address()
-        {
-            return View();
+            result.Status = -2;//CaneledOrder with status = -2;
+            await db.SaveChangesAsync();
+            return Json(new { success = "Huỷ đơn hàng thành công !" }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region ReturnUrl
         // POST: Users/ Login - Register - Logout - returnUrl
         private ActionResult RedireactToLocal(string next)
         {
@@ -175,6 +155,9 @@ namespace Web.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
+        #endregion
+
+        #region Login Customer
         [AllowAnonymous]
         public ActionResult Login(string next)
         {
@@ -188,13 +171,13 @@ namespace Web.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(LoginCustomer c, string next)
+        public async Task<ActionResult> Login(LoginCustomer c, string next)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var user = db.Customers.SingleOrDefault(x => x.Email == c.Email);
+                    var user = await db.Customers.SingleOrDefaultAsync(x => x.Email == c.Email);
                     if (user != null)
                     {
                         var checkpwd = BCrypt.Net.BCrypt.Verify(c.Password, user.Password);
@@ -234,7 +217,20 @@ namespace Web.Controllers
             }
             return View(c);
         }
+        #endregion
 
+        #region Login Facebook
+        private Uri RediredtUri
+        {
+            get
+            {
+                var uriBuilder = new UriBuilder(Request.Url);
+                uriBuilder.Query = null;
+                uriBuilder.Fragment = null;
+                uriBuilder.Path = Url.Action("FacebookCallback");
+                return uriBuilder.Uri;
+            }
+        }
         public ActionResult LoginFacebook()
         {
             var facebook = new FacebookClient();
@@ -248,7 +244,7 @@ namespace Web.Controllers
             });
             return Redirect(loginUrl.AbsoluteUri);
         }
-        public ActionResult FacebookCallback(string code)
+        public async Task<ActionResult> FacebookCallback(string code)
         {
             var facebook = new FacebookClient();
             dynamic result = facebook.Post("oauth/access_token", new
@@ -268,7 +264,7 @@ namespace Web.Controllers
                 string firstname = me.first_name;
                 string middleName = me.middle_name;
                 string lastName = me.last_name;
-                var resultcustomer = db.Customers.FirstOrDefault(x => x.Email == email);
+                var resultcustomer = await db.Customers.FirstOrDefaultAsync(x => x.Email == email);
                 if (resultcustomer == null)
                 {
                     Customer customer = new Customer();
@@ -280,7 +276,7 @@ namespace Web.Controllers
                     customer.DateofBirth = new DateTime(1960, 01, 01);
                     customer.CreateDate = DateTime.Now;
                     db.Customers.Add(customer);
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                     HttpCookie cookie = new HttpCookie("InfoCustomer");
                     cookie["id"] = customer.CustomerId.ToString();
                     cookie["Email"] = customer.Email;
@@ -302,6 +298,9 @@ namespace Web.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
+        #endregion
+
+        #region Register Customer
 
         [AllowAnonymous]
         public ActionResult Register()
@@ -315,14 +314,14 @@ namespace Web.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public ActionResult Register(CustomerViewModel c)
+        public async Task<ActionResult> Register(CustomerViewModel c)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
                     Customer cus = new Customer();
-                    if (db.Customers.Any(x => x.Email == c.Email))
+                    if (await db.Customers.AnyAsync(x => x.Email == c.Email))
                     {
                         setAlert("Lỗi!", "Email đã được sử dụng.", "bottom-left", "error", 12000);
                         return View(c);
@@ -334,7 +333,7 @@ namespace Web.Controllers
                     cus.CreateDate = DateTime.Now;
                     cus.Status = 1;
                     db.Customers.Add(cus);
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                     if (Request.Cookies["Email"] != null)
                     {
                         Response.Cookies["Email"].Expires = DateTime.Now.AddDays(-1);
@@ -350,7 +349,9 @@ namespace Web.Controllers
             }
             return View();
         }
+        #endregion
 
+        #region Logout
         [CustomersAutherize]
         public ActionResult Logout(string next)
         {
@@ -358,29 +359,31 @@ namespace Web.Controllers
             Response.Cookies["Avatar"].Expires = DateTime.Now.AddDays(-2);
             return RedireactToLocal(next);
         }
+        #endregion
 
+        #region Change Password
         [CustomersAutherize]
         public ActionResult ChangePassword()
         {
             int? id = int.Parse(Request.Cookies["InfoCustomer"]["Id"]);
             if (id == null)
             {
-                return HttpNotFound();
+                return HttpNotFound("không tìm thấy user");
             }
             return View();
         }
         [HttpPost]
         [CustomersAutherize]
-        public ActionResult ChangePassword(ChangePasswordModel model)
+        public async Task<ActionResult> ChangePassword(ChangePasswordModel model)
         {
             int? id = int.Parse(Request.Cookies["InfoCustomer"]["Id"]);
             if (id == null)
             {
-                return HttpNotFound();
+                return HttpNotFound("không tìm thấy user");
             }
-            Customer customer = db.Customers.Where(c => c.CustomerId == id).SingleOrDefault();
             if (ModelState.IsValid)
             {
+                Customer customer = await db.Customers.Where(c => c.CustomerId == id).SingleOrDefaultAsync();
                 if (customer != null)
                 {
                     var checkpwd = BCrypt.Net.BCrypt.Verify(model.Password, customer.Password);
@@ -392,7 +395,7 @@ namespace Web.Controllers
                             return View(model);
                         }
                         customer.Password = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
-                        db.SaveChanges();
+                        await db.SaveChangesAsync();
                         setAlert("Success", "Thay dổi mật khẩu thành công, vui lòng đăng nhập lại !", "bottom-left", "success", 5000);
                         Response.Cookies["InfoCustomer"].Expires = DateTime.Now.AddDays(-2);
                         Response.Cookies["Avatar"].Expires = DateTime.Now.AddDays(-2);
@@ -410,13 +413,9 @@ namespace Web.Controllers
             }
             return View(model);
         }
+        #endregion
 
-        /// <summary>
-        /// send email to Users (non action)
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="activeCode"></param>
-        /// <param name="emailFor"></param>
+        #region Send Email
         [NonAction]
         public void SendVerifiedLinkEmail(string email, string activeCode, string emailFor = "VerifyAccount")
         {
@@ -444,7 +443,9 @@ namespace Web.Controllers
             })
                 smtp.Send(message);
         }
+        #endregion
 
+        #region Forgot Password
         // POST: Users/forgot pwd
         public ActionResult ForgotPassword()
         {
@@ -452,7 +453,7 @@ namespace Web.Controllers
         }
         [HttpPost]
         [AllowAnonymous]
-        public ActionResult ForgotPassword(string Email)
+        public async Task<ActionResult> ForgotPassword(string Email)
         {
             if (Request.Cookies["InfoCustomer"] != null)
             {
@@ -460,7 +461,7 @@ namespace Web.Controllers
             }
             string success = "";
             string error = "";
-            var account = db.Customers.Where(x => x.Email == Email).SingleOrDefault();
+            var account = await db.Customers.Where(x => x.Email == Email).SingleOrDefaultAsync();
             if (account != null)
             {
                 //Send Email for reset pwd
@@ -470,7 +471,7 @@ namespace Web.Controllers
                 account.ExpiredTime = DateTime.Now.AddDays(1);
                 //
                 db.Configuration.ValidateOnSaveEnabled = false;
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 success = "Một email đã được gửi đến bạn, vui lòng kiểm tra hộp thư trong Email của bạn";
             }
             else
@@ -481,40 +482,33 @@ namespace Web.Controllers
             ViewBag.success = success;
             return View();
         }
+        #endregion
 
+        #region Reset Password
         // POST: Users/Reset pwd - res_pwd confirm
         [AllowAnonymous]
-        public ActionResult ResetPassword(string id)
+        public async Task<ActionResult> ResetPassword(string id)
         {
-            if (Request.Cookies["InfoCustomer"] != null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            if (id == null)
-            {
-                return HttpNotFound();
-            }
+            if (Request.Cookies["InfoCustomer"] != null) return RedirectToAction("Index", "Home");
+            if (id == null) return HttpNotFound();
+
             //verify the reset password link
-            var user = db.Customers.Where(x => x.ResetPasswordCode == id).FirstOrDefault();
-            if (user != null)
+            var user = await db.Customers.Where(x => x.ResetPasswordCode == id).FirstOrDefaultAsync();
+            if (user == null) return RedirectToAction("Index", "Home");
+            if (user.ExpiredTime < DateTime.Now)
             {
-                if (user.ExpiredTime < DateTime.Now)
-                {
-                    user.ResetPasswordCode = "";
-                    user.ExpiredTime = null;
-                    db.SaveChanges();
-                    return RedirectToAction("Index", "Home");
-                }
-                ResetPasswordModel model = new ResetPasswordModel();
-                model.ResetCode = id;
-                return View(model);
-            }
-            else
+                user.ResetPasswordCode = "";
+                user.ExpiredTime = null;
+                await db.SaveChangesAsync();
                 return RedirectToAction("Index", "Home");
+            }
+            ResetPasswordModel model = new ResetPasswordModel();
+            model.ResetCode = id;
+            return View(model);
         }
         [HttpPost]
         [AllowAnonymous]
-        public ActionResult ResetPassword(ResetPasswordModel model)
+        public async Task<ActionResult> ResetPassword(ResetPasswordModel model)
         {
             if (Request.Cookies["InfoCustomer"] != null)
             {
@@ -524,7 +518,7 @@ namespace Web.Controllers
             var success = "";
             if (ModelState.IsValid)
             {
-                var cus = db.Customers.Where(x => x.ResetPasswordCode == model.ResetCode).FirstOrDefault();
+                var cus =  await db.Customers.Where(x => x.ResetPasswordCode == model.ResetCode).FirstOrDefaultAsync();
                 if (cus != null)
                 {
                     if (cus.ExpiredTime < DateTime.Now)
@@ -537,7 +531,7 @@ namespace Web.Controllers
                     cus.Password = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
                     cus.ResetPasswordCode = "";
                     cus.ExpiredTime = null;
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                     success = "Mật khẩu mới đã được thay đổi thành công, hãy thử ";
                     ViewBag.success = success;
                 }
@@ -548,6 +542,15 @@ namespace Web.Controllers
             }
             return View(model);
         }
+        #endregion
+
+        #region Parial Action, Other
+        [CustomersAutherize]
+        public ActionResult Address()
+        {
+            return View();
+        }
+
 
         // View Partial: Users/right header
         public PartialViewResult RightHeader()
@@ -574,5 +577,6 @@ namespace Web.Controllers
             }
             return PartialView("_MainleftUser", db.Customers.Find(_id));
         }
+        #endregion
     }
 }

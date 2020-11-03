@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Web.Areas.Admin.Models;
@@ -16,19 +17,22 @@ namespace Web.Areas.Admin.Controllers
     public class ProductsController : BaseController
     {
         MobileShopContext db = new MobileShopContext();
+        #region Products
         // GET: Admin/Products
         public ActionResult Index()
         {
             return View(db.Products.Where(x => x.Status == true).ToList());
         }
+        #endregion
 
+        #region Create Product
         //[CustomAuth(Roles = "ADD")]
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
-            var countProvider = db.Providers.Where(x => x.Status == 1).Count();
-            var countCategories = db.Categories.Where(x => x.Status == 1).Count();
-            ViewBag.ProviderId = new SelectList(db.Providers.Where(x => x.Status == 1), "ProviderId", "ProviderName");
-            ViewBag.category = db.Categories.ToList();
+            var countProvider = await db.Providers.Where(x => x.Status == 1).CountAsync();
+            var countCategories = await db.Categories.Where(x => x.Status == 1).CountAsync();
+            ViewBag.ProviderId = new SelectList(await db.Providers.Where(x => x.Status == 1).ToListAsync(), "ProviderId", "ProviderName");
+            ViewBag.category = await db.Categories.ToListAsync();
             if (countProvider <= 0)
             {
                 setAlert("Error !", "Chưa có thương hiệu, vui lòng thêm mới thương hiệu trước khi thêm mới sản phẩm !!", "top-right", "error", 7000);
@@ -40,18 +44,18 @@ namespace Web.Areas.Admin.Controllers
                 return RedirectToAction("Index", "Categories");
             }
             //Lấy thuộc tính sản phẩm
-            ViewBag.TypeAttr = db.TypeAttrs.Include(x => x.Attributes).Where(x => x.Attributes.Count() > 0).AsEnumerable();
+            ViewBag.TypeAttr = await db.TypeAttrs.Include(x => x.Attributes).Where(x => x.Attributes.Count() > 0).ToListAsync();
             return View();
         }
         //[CustomAuth(Roles = "ADD")]
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(ProductViewModel p)
+        public async Task<ActionResult> Create(ProductViewModel p)
         {
-            ViewBag.ProviderId = new SelectList(db.Providers.Where(x => x.Status == 1), "ProviderId", "ProviderName");
-            ViewBag.category = db.Categories.ToList();
-            ViewBag.TypeAttr = db.TypeAttrs.Include(x => x.Attributes).Where(x => x.Attributes.Count() > 0).AsEnumerable();
+            ViewBag.ProviderId = new SelectList(await db.Providers.Where(x => x.Status == 1).ToListAsync(), "ProviderId", "ProviderName");
+            ViewBag.category = await db.Categories.ToListAsync();
+            ViewBag.TypeAttr = await db.TypeAttrs.Include(x => x.Attributes).Where(x => x.Attributes.Count() > 0).ToListAsync();
             if (ViewBag.ProviderId == null)
             {
                 return RedirectToAction("CreateProvider", "Categories");
@@ -78,7 +82,7 @@ namespace Web.Areas.Admin.Controllers
                     product.Status = true;
                     product.ProductAttrs = p.ProductAttrs;
                     db.Products.Add(product);
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                     setAlert("Success !", "Bạn đã thêm mới sản phẩm thành công !", "top-right", "success", 4000);
                     return RedirectToAction("Index", "Products");
                 }
@@ -90,25 +94,27 @@ namespace Web.Areas.Admin.Controllers
             }
             return View(p);
         }
+        #endregion
 
+        #region Update Product
         [ValidateInput(false)]
         //[CustomAuth(Roles = "EDIT")]
-        public ActionResult Edit(int? id)
+        public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return View("Unauthorized");
             }
-            ViewBag.category = db.Categories.ToList();
-            Product product = db.Products.Include(x => x.ProductAttrs).SingleOrDefault(x => x.ProductId == id);
+            ViewBag.category = await db.Categories.ToListAsync();
+            Product product = await db.Products.Include(x => x.ProductAttrs).SingleOrDefaultAsync(x => x.ProductId == id);
             ViewBag.currentCategory = product.CategoryId;
             if (product == null || product.Status == false)
             {
                 return View("Unauthorized");
             }
             //Lấy thuộc tính sản phẩm
-            ViewBag.TypeAttr = db.TypeAttrs.Include(x => x.Attributes).Where(x => x.Attributes.Count() > 0).AsEnumerable();
-            ViewBag.ProviderId = new SelectList(db.Providers.Where(x => x.Status == 1).ToList(), "ProviderId", "ProviderName", product.ProviderId);
+            ViewBag.TypeAttr = await db.TypeAttrs.Include(x => x.Attributes).Where(x => x.Attributes.Count() > 0).ToListAsync();
+            ViewBag.ProviderId = new SelectList(await db.Providers.Where(x => x.Status == 1).ToListAsync(), "ProviderId", "ProviderName", product.ProviderId);
             return View(product);
         }
 
@@ -116,16 +122,16 @@ namespace Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Product p)
+        public async Task<ActionResult> Edit(Product p)
         {
-            ViewBag.category = db.Categories.ToList();
-            ViewBag.TypeAttr = db.TypeAttrs.Include(x => x.Attributes).Where(x => x.Attributes.Count() > 0).AsEnumerable();
-            ViewBag.ProviderId = new SelectList(db.Providers.Where(x => x.Status == 1).ToList(), "ProviderId", "ProviderName", p.ProviderId);
+            ViewBag.category = await db.Categories.ToListAsync();
+            ViewBag.TypeAttr = await db.TypeAttrs.Include(x => x.Attributes).Where(x => x.Attributes.Count() > 0).ToListAsync();
+            ViewBag.ProviderId = new SelectList(await db.Providers.Where(x => x.Status == 1).ToListAsync(), "ProviderId", "ProviderName", p.ProviderId);
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var _product = db.Products.SingleOrDefault(x => x.ProductId == p.ProductId && x.Status == true);
+                    var _product = await db.Products.SingleOrDefaultAsync(x => x.ProductId == p.ProductId && x.Status == true);
                     if (_product != null)
                     {
                         if (p.FeatureImage != null)
@@ -154,7 +160,7 @@ namespace Web.Areas.Admin.Controllers
                                 db.ProductAttrs.AddRange(p.ProductAttrs);
                                 _product.ProductAttrs = p.ProductAttrs;
                             }
-                            db.SaveChanges();
+                            await db.SaveChangesAsync();
                             setAlert("Success !", "Sửa sản phẩm thành công !", "top-right", "success", 4000);
                             ModelState.Clear();
                             return RedirectToAction("Index", "Products");
@@ -180,24 +186,22 @@ namespace Web.Areas.Admin.Controllers
             }
             return View(p);
         }
+        #endregion
 
+        #region Delete Product
         //[CustomAuth(Roles = "DELETE")]
         [HttpPost]
-        public JsonResult Delete(int id)
+        public async Task<JsonResult> Delete(int id)
         {
-            Product rs = db.Products.Where(x => x.ProductId == id && x.Status == true).SingleOrDefault();
-            if (rs != null)
-            {
-                rs.Status = false;
-                db.SaveChanges();
-                return Json(new { success = "Xoá thành công !" }, JsonRequestBehavior.AllowGet);
-            }
-            else
-            {
-                return Json(new { error = "Có gì đó không đúng !" }, JsonRequestBehavior.AllowGet);
-            }
+            Product result = await db.Products.Where(x => x.ProductId == id && x.Status == true).SingleOrDefaultAsync();
+            if (result == null) return Json(new { error = "Có gì đó không đúng !" }, JsonRequestBehavior.AllowGet);
+            result.Status = false;
+            await db.SaveChangesAsync();
+            return Json(new { success = "Xoá thành công !" }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region Banners
         public ActionResult Banner()
         {
             return View();
@@ -208,24 +212,26 @@ namespace Web.Areas.Admin.Controllers
             var banner = db.Banners.Where(x => x.Status == 1 || x.Status == 0);
             return Json(new { data = banner }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region Create Banner
         public ActionResult CreateBanner()
         {
             return View();
         }
         [HttpPost]
-        public ActionResult CreateBanner(Banner banner)
+        public async Task<ActionResult> CreateBanner(Banner banner)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var countBanner = db.Banners.Where(x => x.Status == 1 || x.Status == 0).Count();
+                    var countBanner = await db.Banners.Where(x => x.Status == 1 || x.Status == 0).CountAsync();
                     if (banner.DescriptionBanner == null)
                         banner.DescriptionBanner = "Không có mô tả";
                     banner.Orderby = countBanner + 1;
                     db.Banners.Add(banner);
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                     setAlert("Success !", "Thêm mới thành công !", "top-right", "success", 4000);
                     return RedirectToAction("Banner", "Products");
                 }
@@ -237,7 +243,9 @@ namespace Web.Areas.Admin.Controllers
             }
             return View(banner);
         }
+        #endregion
 
+        #region Update Banner
         public ActionResult EditBanner(int? id)
         {
             if (id == null)
@@ -249,9 +257,9 @@ namespace Web.Areas.Admin.Controllers
             return View(banner);
         }
         [HttpPost]
-        public ActionResult EditBanner(Banner banner)
+        public async Task<ActionResult> EditBanner(Banner banner)
         {
-            var result = db.Banners.Where(x => x.BannerId == banner.BannerId).FirstOrDefault();
+            var result = await db.Banners.Where(x => x.BannerId == banner.BannerId).FirstOrDefaultAsync();
             if (result == null)
             {
                 setAlert("Error !", "Không tìm thấy Banner!", "top-right", "error", 4000);
@@ -259,7 +267,7 @@ namespace Web.Areas.Admin.Controllers
             }
             try
             {
-                var sortOrderby = db.Banners.Where(x => x.Status == 1 || x.Status == 0);
+                var sortOrderby = await db.Banners.Where(x => x.Status == 1 || x.Status == 0).ToListAsync();
                 result.DescriptionBanner = banner.DescriptionBanner;
                 result.BannerImage = banner.BannerImage;
                 result.Orderby = banner.Orderby;
@@ -272,7 +280,7 @@ namespace Web.Areas.Admin.Controllers
                         item.Orderby = ++count;
                     }
                 }
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 setAlert("Success !", "Chỉnh sửa thành công thành công !", "top-right", "success", 4000);
                 return RedirectToAction("Banner", "Products");
             }
@@ -282,24 +290,28 @@ namespace Web.Areas.Admin.Controllers
                 return View(banner);
             }
         }
+        #endregion
 
-        public JsonResult DeleteBanner(int id)
+        #region Delete Banner
+        [HttpPost]
+        public async Task<JsonResult> DeleteBanner(int id)
         {
-            var banner = db.Banners.FirstOrDefault(x => x.BannerId == id);
+            var banner = await db.Banners.FirstOrDefaultAsync(x => x.BannerId == id);
             var sortOrderby = db.Banners.Where(x => x.Status == 1 || x.Status == 0);
             if (banner != null)
             {
                 banner.Status = -1; //
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 int count = 1;
                 foreach (var item in sortOrderby)
                 {
                     item.Orderby = count++;
                 }
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Xoá thành công" }, JsonRequestBehavior.AllowGet);
             }
             return Json(new { error = "Có lỗi khi xoá" }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
     }
 }

@@ -8,6 +8,7 @@ namespace Web.Controllers
 {
     public class BaseController : Controller
     {
+        #region Notication
         // GET: Base
         protected void setAlert(string notication, string messenger, string position, string type,int hideAfter)
         {
@@ -40,5 +41,6 @@ namespace Web.Controllers
                 TempData["typeAlert"] = "error";
             }
         }
+        #endregion
     }
 }

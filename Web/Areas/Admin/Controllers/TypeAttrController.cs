@@ -13,6 +13,7 @@ namespace Web.Areas.Admin.Controllers
     public class TypeAttrController : Controller
     {
         MobileShopContext db = new MobileShopContext();
+        #region TypeAttrs, detail
         // GET: Admin/TypeAttr
         public ActionResult Index()
         {
@@ -25,7 +26,16 @@ namespace Web.Areas.Admin.Controllers
             var result = db.TypeAttrs.Where(x => x.Status == x.Status && x.Status != 10 && x.OrderBy >= 1);
             return Json(new { data = result }, JsonRequestBehavior.AllowGet);
         }
+        // JSON: Admin/Edit TypeAttr JSON
+        public ActionResult GetId(int id)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            var result = db.TypeAttrs.Find(id);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
+        #region Create
         // Json: Admin/Create TypeAttr
         [HttpPost]
         public JsonResult Create(TypeAttr t)
@@ -40,14 +50,9 @@ namespace Web.Areas.Admin.Controllers
             }
             return Json(new { error = "Có lỗi khi thêm mới !" }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
-        // JSON: Admin/Edit TypeAttr JSON
-        public ActionResult GetId(int id)
-        {
-            db.Configuration.ProxyCreationEnabled = false;
-            var result = db.TypeAttrs.Find(id);
-            return Json(result, JsonRequestBehavior.AllowGet);
-        }
+        #region Update
         public ActionResult Edit(TypeAttr t)
         {
             var typeattr = db.TypeAttrs.Where(x => x.TypeId == t.TypeId).SingleOrDefault();
@@ -81,7 +86,9 @@ namespace Web.Areas.Admin.Controllers
                 return Json(new { error = "Có lỗi khi chỉnh sửa !" }, JsonRequestBehavior.AllowGet);
             }
         }
+        #endregion
 
+        #region Delete
         // JSON: Admin/Delete TypeAttr JSON
         [HttpPost]
         public JsonResult Delete(int id)
@@ -106,7 +113,9 @@ namespace Web.Areas.Admin.Controllers
                 return Json(new { error = "có lỗi khi xoá !!" }, JsonRequestBehavior.AllowGet);
             }
         }
+        #endregion
 
+        #region Atributes, detail
         // GET: Admin/Attribute
         public ActionResult Attribute()
         {
@@ -131,7 +140,17 @@ namespace Web.Areas.Admin.Controllers
 
             return Json(new { data = result }, JsonRequestBehavior.AllowGet);
         }
+        //JSON: Admin/Attribute/EditAttr use JSON
+        [HttpPost]
+        public JsonResult GetidAttr(int id)
+        {
+            db.Configuration.ProxyCreationEnabled = false;
+            var attrid = db.Attributes.Find(id);
+            return Json(attrid, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
+        #region Create Atribute
         // JSON: Admin/Attribute/CreateAttr use JSON
         [HttpPost]
         public JsonResult CreateAttr(Attribute a)
@@ -147,15 +166,9 @@ namespace Web.Areas.Admin.Controllers
                 return Json(new { error = "Có lỗi khi thêm mới !!" }, JsonRequestBehavior.AllowGet);
             }
         }
+        #endregion
 
-        //JSON: Admin/Attribute/EditAttr use JSON
-        [HttpPost]
-        public JsonResult GetidAttr(int id)
-        {
-            db.Configuration.ProxyCreationEnabled = false;
-            var attrid = db.Attributes.Find(id);
-            return Json(attrid, JsonRequestBehavior.AllowGet);
-        }
+        #region Update Atribute
         [HttpPost]
         public JsonResult EditAttr(Attribute a)
         {
@@ -183,7 +196,9 @@ namespace Web.Areas.Admin.Controllers
 
             }
         }
+        #endregion
 
+        #region Delete Atribute
         //JSON: Admin/Attribute/DeleteAttr use JSON
         public JsonResult DeleteAttr(int id)
         {
@@ -199,5 +214,6 @@ namespace Web.Areas.Admin.Controllers
                 return Json(new { error = "Có gì đó không đúng!!" }, JsonRequestBehavior.AllowGet);
             }
         }
+        #endregion
     }
 }

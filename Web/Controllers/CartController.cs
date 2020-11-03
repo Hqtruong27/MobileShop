@@ -14,6 +14,8 @@ namespace Web.Controllers
     public class CartController : Controller
     {
         MobileShopContext db = new MobileShopContext();
+
+        #region Carts
         // GET: Cart
         public ActionResult Index()
         {
@@ -42,6 +44,9 @@ namespace Web.Controllers
             var list = db.AddToCarts.Where(x => x.CustomerId == parseIntUser).ToList();
             return PartialView("_GetallCart", list);
         }
+        #endregion
+
+        #region Update Quantity
         //POST: Delete cart
         [HttpPost]
         public ActionResult UpdateQuantity(int? id, int quantity)
@@ -76,7 +81,9 @@ namespace Web.Controllers
             }
             return Json(new { error = "Có gì đó không đúng !!" }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region Delete product Carts
         //POST: Delete cart
         [HttpPost]
         public JsonResult Delete(int id)
@@ -93,7 +100,9 @@ namespace Web.Controllers
                 return Json(new { error = "Có gì đó không đúng !!" }, JsonRequestBehavior.AllowGet);
             }
         }
+        #endregion
 
+        #region Payment
         //POST: Payment
         public ActionResult Payment()
         {
@@ -183,5 +192,6 @@ namespace Web.Controllers
                 return RedirectToAction("Payment");
             }
         }
+        #endregion
     }
 }

@@ -14,7 +14,7 @@ namespace Web.Areas.Admin.Controllers
     public class GroupsController : Controller
     {
         MobileShopContext db = new MobileShopContext();
-
+        #region Group Roles
         // GET: Admin/Groups
         public ActionResult Index()
         {
@@ -35,7 +35,9 @@ namespace Web.Areas.Admin.Controllers
             var data = db.GroupRoles.Where(x => x.GroupId == id).ToList();
             return Json(data, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region Grand Role
         // GET: Admin/Groups/gán và huỷ quyền người dùng
         [HttpPost]
         public ActionResult GrandRole(GroupRole gr)
@@ -66,7 +68,9 @@ namespace Web.Areas.Admin.Controllers
                 Message = mes,
             }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region List Role Users, detail
         // GET - JSON: Admin/Groups/Listroles/List Roles for Users
         public ActionResult ListRole()
         {
@@ -79,7 +83,15 @@ namespace Web.Areas.Admin.Controllers
             return Json(new { data = data }, JsonRequestBehavior.AllowGet);
         }
 
+        // POST: Admin/Roles/Get id group
+        public JsonResult GetId(string id)
+        {
+            var data = db.Groups.Where(x => (x.Status == 1 || x.Status == 0) && x.GroupId == id).SingleOrDefault();
+            return Json(data, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
+        #region New Role for User
         // POST: Admin/Groups/Create New Role for Users(for ViewListRole)
         public ActionResult CreateRole()
         {
@@ -114,14 +126,9 @@ namespace Web.Areas.Admin.Controllers
             }
             return View(g);
         }
+        #endregion
 
-        // POST: Admin/Roles/Get id group
-        public JsonResult GetId(string id)
-        {
-            var data = db.Groups.Where(x => (x.Status == 1 || x.Status == 0) && x.GroupId == id).SingleOrDefault();
-            return Json(data, JsonRequestBehavior.AllowGet);
-        }
-
+        #region Edit Role
         //Edit/Roles/Json
         [HttpPost]
         public JsonResult EditRole(Group group)
@@ -140,5 +147,6 @@ namespace Web.Areas.Admin.Controllers
                 return Json(new { error = "Có gì đó không đúng!" }, JsonRequestBehavior.AllowGet);
             }
         }
+        #endregion
     }
 }

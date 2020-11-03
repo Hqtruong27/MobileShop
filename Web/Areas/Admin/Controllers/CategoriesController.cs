@@ -4,6 +4,7 @@ using Models.ViewModels;
 using System;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Helpers;
 using System.Web.Mvc;
 using Web.Controllers;
@@ -18,11 +19,11 @@ namespace Web.Areas.Admin.Controllers
         {
             return View(db.Categories.Where(x => (x.Status == 1 || x.Status == 0) && x.ParentId == null).OrderBy(x => x.Orderby).ToList());
         }
-        public ActionResult Getdata()
+        public async Task<ActionResult> Getdata()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            var cate = db.Categories.Where(x => x.Status == 1 && x.ParentId == null).OrderBy(x => x.Orderby).ToList();
-            return Json(new { data = cate }, JsonRequestBehavior.AllowGet);
+            var categories = await db.Categories.Where(x => x.Status == 1 && x.ParentId == null).OrderBy(x => x.Orderby).ToListAsync();
+            return Json(new { data = categories }, JsonRequestBehavior.AllowGet);
         }
 
 
@@ -30,20 +31,21 @@ namespace Web.Areas.Admin.Controllers
         /// Create Categories
         /// </summary>
         /// <returns></returns>
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
-            ViewBag.ParentId = new SelectList(db.Categories.Where(x => x.Status == 1 && x.ParentId == null).OrderBy(x => x.Orderby).ToList(), "CategoryId", "CategoryName");
+            var categories = await db.Categories.Where(x => x.Status == 1 && x.ParentId == null).OrderBy(x => x.Orderby).ToListAsync();
+            ViewBag.ParentId = new SelectList(categories, "CategoryId", "CategoryName");
             return View();
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(CreateCategories c)
+        public async Task<ActionResult> Create(CreateCategories c)
         {
-            ViewBag.ParentId = new SelectList(db.Categories.Where(x => x.Status == 1 && x.ParentId == null).OrderBy(x => x.Orderby).ToList(), "CategoryId", "CategoryName");
+            ViewBag.ParentId = new SelectList(await db.Categories.Where(x => x.Status == 1 && x.ParentId == null).OrderBy(x => x.Orderby).ToListAsync(), "CategoryId", "CategoryName");
             if (ModelState.IsValid)
             {
-                var sortOderbyNull = db.Categories.Where(x => x.ParentId == null && x.Status != 10).OrderBy(x => x.Orderby).Count();
-                var sortOderbyNotNull = db.Categories.Where(x => x.ParentId != null && x.Status != 10).OrderBy(x => x.Orderby).Count();
+                var sortOderbyNull = await db.Categories.Where(x => x.ParentId == null && x.Status != 10).OrderBy(x => x.Orderby).CountAsync();
+                var sortOderbyNotNull = await db.Categories.Where(x => x.ParentId != null && x.Status != 10).OrderBy(x => x.Orderby).CountAsync();
                 Category cate = new Category();
                 if (c.ParentId == null)
                 {
@@ -57,7 +59,7 @@ namespace Web.Areas.Admin.Controllers
                 cate.CategoryName = c.CategoryName;
                 cate.ParentId = c.ParentId;
                 db.Categories.Add(cate);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 if (cate.ParentId == null)
                 {
                     return RedirectToAction("Index", "Categories");
@@ -75,35 +77,35 @@ namespace Web.Areas.Admin.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public ActionResult Edit(int? id)
+        public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return View("Unauthorized");
             }
-            var category = db.Categories.Where(x => x.CategoryId == id).SingleOrDefault();
+            var category = await db.Categories.Where(x => x.CategoryId == id).SingleOrDefaultAsync();
             if (category == null)
             {
                 return View("Unauthorized");
             }
-            var findThisHasParentCategory = db.Categories.Where(x => x.ParentId != null && x.ParentId == category.CategoryId).Count();
+            var findThisHasParentCategory = await db.Categories.Where(x => x.ParentId != null && x.ParentId == category.CategoryId).CountAsync();
             if (findThisHasParentCategory > 0)
             {
                 ViewBag.showmsg = "Không thể chọn làm danh mục con vì danh mục này đã chứa danh mục con !";
                 return View(category);
 
             }
-            ViewBag.ParentId = new SelectList(db.Categories.Where(x => x.Status == 1 && x.ParentId == null && x.CategoryId != id).OrderBy(x => x.Orderby).ToList(), "CategoryId", "CategoryName", category.ParentId);
+            ViewBag.ParentId = new SelectList(await db.Categories.Where(x => x.Status == 1 && x.ParentId == null && x.CategoryId != id).OrderBy(x => x.Orderby).ToListAsync(), "CategoryId", "CategoryName", category.ParentId);
             return View(category);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Category c)
+        public async Task<ActionResult> Edit(Category c)
         {
-            ViewBag.ParentId = new SelectList(db.Categories.Where(x => x.Status == 1 && x.ParentId == null && x.CategoryId != c.CategoryId).OrderBy(x => x.Orderby).ToList(), "CategoryId", "CategoryName", c.ParentId);
-            var editCate = db.Categories.SingleOrDefault(x => x.CategoryId == c.CategoryId);
-            var listToOrderingParentNull = db.Categories.Where(x => (x.Status == 0 || x.Status == 1) && x.ParentId == null).ToList();
-            var listToOrderingParentNotNull = db.Categories.Where(x => (x.Status == 0 || x.Status == 1) && x.ParentId != null).ToList();
+            ViewBag.ParentId = new SelectList(await db.Categories.Where(x => x.Status == 1 && x.ParentId == null && x.CategoryId != c.CategoryId).OrderBy(x => x.Orderby).ToListAsync(), "CategoryId", "CategoryName", c.ParentId);
+            var editCate = await db.Categories.SingleOrDefaultAsync(x => x.CategoryId == c.CategoryId);
+            var listToOrderingParentNull = await db.Categories.Where(x => (x.Status == 0 || x.Status == 1) && x.ParentId == null).ToListAsync();
+            var listToOrderingParentNotNull = await db.Categories.Where(x => (x.Status == 0 || x.Status == 1) && x.ParentId != null).ToListAsync();
             var sortParentCategory = 0;
             var sortCategory = 0;
             if (ModelState.IsValid)
@@ -146,7 +148,7 @@ namespace Web.Areas.Admin.Controllers
                                 item.Orderby = ++sortCategory;
                             }
                         }
-                        db.SaveChanges();
+                        await db.SaveChangesAsync();
                         if (editCate.ParentId == null)
                         {
                             return RedirectToAction("Index", "Categories");
@@ -164,11 +166,11 @@ namespace Web.Areas.Admin.Controllers
         [HttpPost]
 
         //JSON/Categories/delete category
-        public JsonResult Delete(int id)
+        public async Task<JsonResult> Delete(int id)
         {
-            var result = db.Categories.Where(x => (x.Status == 0 || x.Status == 1) && x.CategoryId == id).SingleOrDefault();
-            var sortOrderby = db.Categories.Where(x => (x.Status == 0 || x.Status == 1) && x.ParentId == null && x.CategoryId != id).OrderBy(x => x.Orderby).ToList();
-            var sortOrderbyParent = db.Categories.Where(x => (x.Status == 0 || x.Status == 1) && x.ParentId != null && x.CategoryId != id).OrderBy(x => x.Orderby).ToList();
+            var result = await db.Categories.SingleOrDefaultAsync(x => (x.Status == 0 || x.Status == 1) && x.CategoryId == id);
+            var sortOrderby = await db.Categories.Where(x => (x.Status == 0 || x.Status == 1) && x.ParentId == null && x.CategoryId != id).OrderBy(x => x.Orderby).ToListAsync();
+            var sortOrderbyParent = await db.Categories.Where(x => (x.Status == 0 || x.Status == 1) && x.ParentId != null && x.CategoryId != id).OrderBy(x => x.Orderby).ToListAsync();
             if (result != null)
             {
                 result.Status = 10; //delete with status = 10;
@@ -188,7 +190,7 @@ namespace Web.Areas.Admin.Controllers
                         item.Orderby = oderby++;
                     }
                 }
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Xoá thành công !" }, JsonRequestBehavior.AllowGet);
             }
             else
@@ -205,10 +207,10 @@ namespace Web.Areas.Admin.Controllers
         {
             return View();
         }
-        public ActionResult GetdataParentCate()
+        public async Task<ActionResult> GetdataParentCate()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            var result = db.Categories.Where(x => (x.Status == 1 || x.Status == 0) && x.ParentId != null).OrderBy(x => x.Orderby).ToList();
+            var result = await db.Categories.Where(x => (x.Status == 1 || x.Status == 0) && x.ParentId != null).OrderBy(x => x.Orderby).ToListAsync();
             return Json(new { data = result }, JsonRequestBehavior.AllowGet);
         }
 
@@ -217,22 +219,22 @@ namespace Web.Areas.Admin.Controllers
         {
             return View();
         }
-        public JsonResult GetdataProviders()
+        public async Task<JsonResult> GetdataProviders()
         {
             db.Configuration.ProxyCreationEnabled = false;
-            var data = db.Providers.Where(x => x.Status == 1 || x.Status == 0).ToList();
+            var data = await db.Providers.Where(x => x.Status == 1 || x.Status == 0).ToListAsync();
             return Json(new { data = data }, JsonRequestBehavior.AllowGet);
         }
 
         //JSON/Providers/create new provider
-        public JsonResult CreateProvider(Provider provider)
+        public async Task<JsonResult> CreateProvider(Provider provider)
         {
             if (ModelState.IsValid)
             {
-                var countProvider = db.Providers.Where(x => x.Status != 10).Count();
+                var countProvider = await db.Providers.Where(x => x.Status != 10).CountAsync();
                 provider.Orderby = countProvider + 1;
                 db.Providers.Add(provider);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Thêm mới thành công !!" }, JsonRequestBehavior.AllowGet);
             }
             else
@@ -242,17 +244,17 @@ namespace Web.Areas.Admin.Controllers
         }
 
         //JSON/Providers/Getid
-        public JsonResult GetIdProvider(int id)
+        public async Task<JsonResult> GetIdProvider(int id)
         {
             db.Configuration.ProxyCreationEnabled = false;
-            var provider = db.Providers.Where(x => (x.Status == 1 || x.Status == 0) && x.ProviderId == id).FirstOrDefault();
+            var provider = await db.Providers.FirstOrDefaultAsync(x => (x.Status == 1 || x.Status == 0) && x.ProviderId == id);
             return Json(provider, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public JsonResult EditProvider(Provider provider)
+        public async Task<JsonResult> EditProvider(Provider provider)
         {
-            var result = db.Providers.Where(x => (x.Status == 1 || x.Status == 0) && x.ProviderId == provider.ProviderId).FirstOrDefault();
-            var sortProvider = db.Providers.OrderBy(x => x.Orderby).Where(x => x.Status != 10 && x.ProviderId != provider.ProviderId && x.Orderby >= provider.Orderby);
+            var result = await db.Providers.Where(x => (x.Status == 1 || x.Status == 0) && x.ProviderId == provider.ProviderId).FirstOrDefaultAsync();
+            var sortProvider = await db.Providers.OrderBy(x => x.Orderby).Where(x => x.Status != 10 && x.ProviderId != provider.ProviderId && x.Orderby >= provider.Orderby).ToListAsync();
             if (result != null)
             {
                 if (result.Orderby != provider.Orderby)
@@ -266,7 +268,7 @@ namespace Web.Areas.Admin.Controllers
                 result.Orderby = provider.Orderby;
                 result.ProviderName = provider.ProviderName;
                 result.Status = provider.Status;
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Chỉnh sửa thành công !!" }, JsonRequestBehavior.AllowGet);
             }
             else
@@ -276,13 +278,13 @@ namespace Web.Areas.Admin.Controllers
         }
 
         //JSON/Providers/delete provider
-        public JsonResult DeleteProvider(int id)
+        public async Task<JsonResult> DeleteProvider(int id)
         {
-            var provider = db.Providers.Where(x => (x.Status == 1 || x.Status == 0) && x.ProviderId == id).FirstOrDefault();
+            var provider = await db.Providers.FirstOrDefaultAsync(x => (x.Status == 1 || x.Status == 0) && x.ProviderId == id);
             if (provider != null)
             {
                 provider.Status = 10; //delete with status = 10;
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Xoá thành công !!" }, JsonRequestBehavior.AllowGet);
             }
             else

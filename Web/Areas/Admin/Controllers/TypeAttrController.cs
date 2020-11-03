@@ -4,6 +4,8 @@ using Models.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data.Entity;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Attribute = Models.Models.DataModels.Attribute;
@@ -27,10 +29,11 @@ namespace Web.Areas.Admin.Controllers
             return Json(new { data = result }, JsonRequestBehavior.AllowGet);
         }
         // JSON: Admin/Edit TypeAttr JSON
-        public ActionResult GetId(int id)
+        public async Task<ActionResult> GetId(int id)
         {
             db.Configuration.ProxyCreationEnabled = false;
-            var result = db.TypeAttrs.Find(id);
+            var result = await db.TypeAttrs.FindAsync(id);
+            if (result == null) return Json(new { error = "Không tìm thấy Id !" }, JsonRequestBehavior.AllowGet);
             return Json(result, JsonRequestBehavior.AllowGet);
         }
         #endregion
@@ -38,29 +41,30 @@ namespace Web.Areas.Admin.Controllers
         #region Create
         // Json: Admin/Create TypeAttr
         [HttpPost]
-        public JsonResult Create(TypeAttr t)
+        public async Task<JsonResult> Create(TypeAttr t)
         {
             if (ModelState.IsValid)
             {
-                var countOrderby = db.TypeAttrs.OrderBy(x => x.OrderBy).Where(x => x.Status != 10).Count();
+                var countOrderby = await db.TypeAttrs.OrderBy(x => x.OrderBy).Where(x => x.Status != 10).CountAsync();
                 t.OrderBy = countOrderby + 1;
                 db.TypeAttrs.Add(t);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Thêm mới thành công !" }, JsonRequestBehavior.AllowGet);
             }
-            return Json(new { error = "Có lỗi khi thêm mới !" }, JsonRequestBehavior.AllowGet);
+            return Json(new { error = ModelState }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
         #region Update
-        public ActionResult Edit(TypeAttr t)
+        public async Task<ActionResult> Edit(TypeAttr t)
         {
-            var typeattr = db.TypeAttrs.Where(x => x.TypeId == t.TypeId).SingleOrDefault();
+            var typeattr = await db.TypeAttrs.Where(x => x.TypeId == t.TypeId).SingleOrDefaultAsync();
             if (typeattr != null)
             {
-                var coutOrderby = db.TypeAttrs.OrderBy(x => x.OrderBy).Where(y => y.TypeId != t.TypeId && y.Status != 10 && y.OrderBy >= t.OrderBy).ToList();
-                typeattr.TypeName = t.TypeName;
+                var coutOrderby = await db.TypeAttrs.OrderBy(x => x.OrderBy)
+                    .Where(y => y.TypeId != t.TypeId && y.Status != 10 && y.OrderBy >= t.OrderBy).ToListAsync();
 
+                typeattr.TypeName = t.TypeName;
                 if (t.OrderBy > 0)
                 {
                     if (typeattr.OrderBy != t.OrderBy)
@@ -73,31 +77,25 @@ namespace Web.Areas.Admin.Controllers
                     }
                     typeattr.OrderBy = t.OrderBy;
                     typeattr.Status = t.Status;
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                     return Json(new { success = "Chỉnh sửa thành công !" }, JsonRequestBehavior.AllowGet);
                 }
-                else
-                {
-                    return Json(new { error = "Số thứ tự không được nhỏ hơn 1 !" }, JsonRequestBehavior.AllowGet);
-                }
+                return Json(new { error = "Số thứ tự không được nhỏ hơn 1 !" }, JsonRequestBehavior.AllowGet);
             }
-            else
-            {
-                return Json(new { error = "Có lỗi khi chỉnh sửa !" }, JsonRequestBehavior.AllowGet);
-            }
+            return Json(new { error = "Không tìm thấy !" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
         #region Delete
         // JSON: Admin/Delete TypeAttr JSON
         [HttpPost]
-        public JsonResult Delete(int id)
+        public async Task<JsonResult> Delete(int id)
         {
             db.Configuration.ProxyCreationEnabled = false;
-            var result = db.TypeAttrs.Where(x => x.TypeId == id).SingleOrDefault();
+            var result = await db.TypeAttrs.Where(x => x.TypeId == id).SingleOrDefaultAsync();
             if (result != null)
             {
-                var listOrderby = db.TypeAttrs.OrderBy(x => x.OrderBy).Where(x => x.TypeId != id && x.Status != 10);
+                var listOrderby = await db.TypeAttrs.OrderBy(x => x.OrderBy).Where(x => x.TypeId != id && x.Status != 10).ToListAsync();
                 var count = 0;
                 foreach (var item in listOrderby)
                 {
@@ -105,13 +103,10 @@ namespace Web.Areas.Admin.Controllers
                 }
                 result.OrderBy = -1;
                 result.Status = 10; //delete with change status = 10
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Xoá thành công !!" }, JsonRequestBehavior.AllowGet);
             }
-            else
-            {
-                return Json(new { error = "có lỗi khi xoá !!" }, JsonRequestBehavior.AllowGet);
-            }
+            return Json(new { error = "Không tìm thấy Id TypeAttr !!" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
@@ -153,12 +148,12 @@ namespace Web.Areas.Admin.Controllers
         #region Create Atribute
         // JSON: Admin/Attribute/CreateAttr use JSON
         [HttpPost]
-        public JsonResult CreateAttr(Attribute a)
+        public async Task<JsonResult> CreateAttr(Attribute a)
         {
             if (ModelState.IsValid)
             {
                 db.Attributes.Add(a);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Thêm mới thành công !!" }, JsonRequestBehavior.AllowGet);
             }
             else
@@ -170,49 +165,39 @@ namespace Web.Areas.Admin.Controllers
 
         #region Update Atribute
         [HttpPost]
-        public JsonResult EditAttr(Attribute a)
+        public async Task<JsonResult> EditAttr(Attribute a)
         {
             db.Configuration.ProxyCreationEnabled = false;
             if (ModelState.IsValid)
             {
-                var attr = db.Attributes.Where(x => x.AttrId == a.AttrId).FirstOrDefault();
+                var attr = await db.Attributes.Where(x => x.AttrId == a.AttrId).FirstOrDefaultAsync();
                 if (attr != null)
                 {
                     attr.AttrName = a.AttrName;
                     attr.TypeId = a.TypeId;
                     attr.Value = a.Value;
                     attr.Status = a.Status;
-                    db.SaveChanges();
-                    return Json(new {success = "Chỉnh sửa thành công !!" }, JsonRequestBehavior.AllowGet);
+                    await db.SaveChangesAsync();
+                    return Json(new { success = "Chỉnh sửa thành công !!" }, JsonRequestBehavior.AllowGet);
                 }
-                else
-                {
-                    return Json(new { error = "Không thể chỉnh sửa !!" }, JsonRequestBehavior.AllowGet);
-                }
+                return Json(new { error = "Không tìm thấy Attr !!" }, JsonRequestBehavior.AllowGet);
             }
-            else
-            {
-                return Json(new { error = "Không thể chỉnh sửa !!" }, JsonRequestBehavior.AllowGet);
-
-            }
+            return Json(new { error = ModelState }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
         #region Delete Atribute
         //JSON: Admin/Attribute/DeleteAttr use JSON
-        public JsonResult DeleteAttr(int id)
+        public async Task<JsonResult> DeleteAttr(int id)
         {
-            var attrid = db.Attributes.Where(x => x.AttrId == id).FirstOrDefault();
+            var attrid = await db.Attributes.FindAsync(id);
             if (attrid != null)
             {
                 attrid.Status = 10; //delete with change status = 10;
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Xoá thành công !!" }, JsonRequestBehavior.AllowGet);
             }
-            else
-            {
-                return Json(new { error = "Có gì đó không đúng!!" }, JsonRequestBehavior.AllowGet);
-            }
+            return Json(new { error = "Có gì đó không đúng!!" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
     }

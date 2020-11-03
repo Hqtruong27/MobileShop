@@ -3,7 +3,9 @@ using Models.Models.DataModels;
 using Models.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Web.Controllers;
@@ -55,7 +57,7 @@ namespace Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(News news)
+        public async Task<ActionResult> Create(News news)
         {
             var user = (User)HttpContext.Session["User"];
             if (user == null)
@@ -70,7 +72,7 @@ namespace Web.Areas.Admin.Controllers
                     news.Created = DateTime.Now;
                     news.UserId = user.UserId;
                     db.News.Add(news);
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                     setAlert("Success !", "Thêm mới thành công !!", "top-right", "success", 4000);
                     return RedirectToAction("Index");
                 }
@@ -86,36 +88,31 @@ namespace Web.Areas.Admin.Controllers
 
         #region Update News
         //GET: Admin/Edit News
-        public ActionResult Edit(int? id)
+        public async Task<ActionResult> Edit(int? id)
         {
             var user = (User)HttpContext.Session["User"];
             if (user == null || id == null)
             {
                 return View("Unauthorized");
             }
-            News news = db.News.Find(id);
-            if (news == null)
-            {
-                return View("Unauthorized");
-            }
+            News news = await db.News.FindAsync(id);
+            if (news == null) return View("Unauthorized");
             return View(news);
         }
         //POST: Admin/Edit News
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(News news)
+        public async Task<ActionResult> Edit(News news)
         {
             var user = (User)HttpContext.Session["User"];
-            if (news == null)
-            {
-                return View("Unauthorized");
-            }
+            if (news == null) return View("Unauthorized");
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var result = db.News.Where(n => n.NewsId == news.NewsId).FirstOrDefault();
+                    var result = await db.News.Where(n => n.NewsId == news.NewsId).FirstOrDefaultAsync();
                     if (result != null)
                     {
                         result.NewsTitle = news.NewsTitle;
@@ -123,15 +120,12 @@ namespace Web.Areas.Admin.Controllers
                         result.ShortDescription = news.ShortDescription;
                         result.Description = news.Description;
                         result.Status = news.Status;
-                        db.SaveChanges();
+                        await db.SaveChangesAsync();
                         setAlert("Success !", "Chỉnh sửa thành công !!", "top-right", "success", 4000);
                         return RedirectToAction("Index");
                     }
-                    else
-                    {
-                        setAlert("Error !", "Không tìm thấy bài viết !!", "top-right", "error", 4000);
-                        return RedirectToAction("Index");
-                    }
+                    setAlert("Error !", "Không tìm thấy bài viết !!", "top-right", "error", 4000);
+                    return RedirectToAction("Index");
                 }
                 catch (Exception)
                 {
@@ -146,22 +140,18 @@ namespace Web.Areas.Admin.Controllers
         #region Delete News
         //JSON: Admin/Delete News
         [HttpPost]
-        public JsonResult Delete(int? id)
+        public async Task<JsonResult> Delete(int? id)
         {
             var user = (User)HttpContext.Session["User"];
-            if (user == null)
-            {
-                return Json(new { nulluser = "" }, JsonRequestBehavior.AllowGet);
-            }
-            if (id == null)
-            {
-                return Json(new { error = "Không tìm thấy bài viết" }, JsonRequestBehavior.AllowGet);
-            }
-            News news = db.News.Find(id);
+            if (user == null) return Json(new { nulluser = "" }, JsonRequestBehavior.AllowGet);
+
+            if (id == null) return Json(new { error = "Không tìm thấy bài viết" }, JsonRequestBehavior.AllowGet);
+
+            News news = await db.News.FindAsync(id);
             if (news != null)
             {
                 news.Status = 10;//delete with status = 10
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Xoá thành công" }, JsonRequestBehavior.AllowGet);
             }
             return Json(new { error = "Không tìm thấy bài viết" }, JsonRequestBehavior.AllowGet);

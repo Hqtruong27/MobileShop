@@ -13,6 +13,7 @@ using Web.Areas.Admin.Models;
 using System.Web.Configuration;
 using System.Web.SessionState;
 using WebGrease.Css.Extensions;
+using System.Threading.Tasks;
 
 namespace Web.Areas.Admin.Controllers
 {
@@ -142,13 +143,13 @@ namespace Web.Areas.Admin.Controllers
         {
             return PartialView("_InfoUserTopRight");
         }
-        public PartialViewResult Notifications()
+        public async Task<PartialViewResult> NotificationsAsync()
         {
 
-            var notiFeedback = db.Feedbacks.Where(x => x.Status == 0).Take(4).ToList();
-            ViewBag.coutPenddingFeedback = db.Feedbacks.Where(x => x.Status == 0).Count();
-            ViewBag.Orders = db.Orders.Where(x => x.Status == 0).Take(4).OrderByDescending(x => x.Created).ToList();
-            ViewBag.CountOrders = db.Orders.Where(x => x.Status == 0).Count();
+            var notiFeedback = await db.Feedbacks.Where(x => x.Status == 0).Take(4).ToListAsync();
+            ViewBag.coutPenddingFeedback = await db.Feedbacks.Where(x => x.Status == 0).CountAsync();
+            ViewBag.Orders = await db.Orders.Where(x => x.Status == 0).Take(4).OrderByDescending(x => x.Created).ToListAsync();
+            ViewBag.CountOrders = await db.Orders.Where(x => x.Status == 0).CountAsync();
             return PartialView("_Notifications", notiFeedback);
         }
         #endregion

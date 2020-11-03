@@ -15,9 +15,9 @@ namespace Web.Areas.Admin.Controllers
     {
         MobileShopContext db = new MobileShopContext();
         // GET: Admin/Categories
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(db.Categories.Where(x => (x.Status == 1 || x.Status == 0) && x.ParentId == null).OrderBy(x => x.Orderby).ToList());
+            return View(await db.Categories.Where(x => (x.Status == 1 || x.Status == 0) && x.ParentId == null).OrderBy(x => x.Orderby).ToListAsync());
         }
         public async Task<ActionResult> Getdata()
         {

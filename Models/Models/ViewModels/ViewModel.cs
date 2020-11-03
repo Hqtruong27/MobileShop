@@ -12,7 +12,7 @@ using System.Web;
 namespace Models.ViewModels
 {
     //Customer
-    //Register and login Viewmodel Customer
+    //Register and login Viewmodel Customer.....
     public class CustomerViewModel
     {
         [Required(ErrorMessage = "Vui lòng nhập Họ Tên")]

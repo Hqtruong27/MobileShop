@@ -8,7 +8,7 @@ using System.Web.Mvc;
 
 namespace Web.Areas.Admin.Models
 {
-    public class CustomAuthAttribute : AuthorizeAttribute
+    public class AdminAuthorizeAttribute : AuthorizeAttribute
     {
         MobileShopContext db = new MobileShopContext();
         //Check login, quyền

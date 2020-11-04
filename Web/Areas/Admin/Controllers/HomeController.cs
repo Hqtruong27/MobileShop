@@ -17,12 +17,12 @@ using System.Threading.Tasks;
 
 namespace Web.Areas.Admin.Controllers
 {
-    [CustomAuth]
+    [AdminAuthorize]
     public class HomeController : BaseController
     {
         MobileShopContext db = new MobileShopContext();
-        // GET: Admin/Home
         #region Home
+        // GET: Admin/Home
         public ActionResult Index()
         {
             ViewBag.invoice = db.Orders.Where(x => x.Status == 2).Count();
@@ -52,16 +52,18 @@ namespace Web.Areas.Admin.Controllers
         #endregion
 
         #region Feedback, detail, handle feedback
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult Feedback()
         {
             return View();
         }
+        [AdminAuthorize(Roles = "VIEW")]
         public JsonResult GetAllFeedback()
         {
             var feedback = db.Feedbacks.ToList();
             return Json(new { data = feedback }, JsonRequestBehavior.AllowGet);
         }
-
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult FeedbackDetail(int? id)
         {
             if (id == null)
@@ -77,23 +79,23 @@ namespace Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public JsonResult HandleFeedback(Feedback f)
+        [AdminAuthorize(Roles = "UPDATE")]
+        public async Task<JsonResult> HandleFeedback(Feedback f)
         {
 
-            var feedback = db.Feedbacks.Where(x => x.FeedBackId == f.FeedBackId).FirstOrDefault();
+            var feedback = await db.Feedbacks.Where(x => x.FeedBackId == f.FeedBackId).FirstOrDefaultAsync();
             if (feedback == null)
             {
                 return Json(new { error = "Not Found !!" }, JsonRequestBehavior.AllowGet);
             }
             try
             {
-
                 if (f.Status > 1 || f.Status < -1)
                 {
                     return Json(new { error = "Có lỗi, vui lòng thử lại" }, JsonRequestBehavior.AllowGet);
                 }
                 feedback.Status = f.Status;//handle feedback with state = 1
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return Json(new { success = "Đã xử lý !!" }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception)

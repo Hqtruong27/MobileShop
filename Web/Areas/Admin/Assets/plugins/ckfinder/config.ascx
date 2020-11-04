@@ -17,7 +17,7 @@
 		// ... where Session[ "IsAuthorized" ] is set to "true" as soon as the
 		// user logs on your system.
 
-		return true;
+		return false;
 	}
 
 	/**
@@ -27,11 +27,11 @@
 	{
 		// Paste your license name and key here. If left blank, CKFinder will
 		// be fully functional, in Demo Mode.
-		LicenseName = "Hqtruong";
-		LicenseKey = "R9JH8AQ7RX2Q8XC9M4R6RAD29GUUVXH4";
+		LicenseName = "";
+		LicenseKey = "";
 
 		// The base URL used to reach files in CKFinder through the browser.
-		BaseUrl = "~/Content/uploads/";
+		BaseUrl = "/ckfinder/userfiles/";
 
 		// The phisical directory in the server where the file will end up. If
 		// blank, CKFinder attempts to resolve BaseUrl.

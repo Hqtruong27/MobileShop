@@ -7,18 +7,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Helpers;
 using System.Web.Mvc;
+using Web.Areas.Admin.Models;
 using Web.Controllers;
 
 namespace Web.Areas.Admin.Controllers
 {
+    [AdminAuthorize]
     public class CategoriesController : BaseController
     {
         MobileShopContext db = new MobileShopContext();
         // GET: Admin/Categories
+        [AdminAuthorize(Roles = "VIEW")]
         public async Task<ActionResult> Index()
         {
             return View(await db.Categories.Where(x => (x.Status == 1 || x.Status == 0) && x.ParentId == null).OrderBy(x => x.Orderby).ToListAsync());
         }
+        [AdminAuthorize(Roles = "VIEW")]
         public async Task<ActionResult> Getdata()
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -31,6 +35,8 @@ namespace Web.Areas.Admin.Controllers
         /// Create Categories
         /// </summary>
         /// <returns></returns>
+        /// 
+        [AdminAuthorize(Roles = "CREATE")]
         public async Task<ActionResult> Create()
         {
             var categories = await db.Categories.Where(x => x.Status == 1 && x.ParentId == null).OrderBy(x => x.Orderby).ToListAsync();
@@ -39,6 +45,7 @@ namespace Web.Areas.Admin.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AdminAuthorize(Roles = "CREATE")]
         public async Task<ActionResult> Create(CreateCategories c)
         {
             ViewBag.ParentId = new SelectList(await db.Categories.Where(x => x.Status == 1 && x.ParentId == null).OrderBy(x => x.Orderby).ToListAsync(), "CategoryId", "CategoryName");
@@ -77,6 +84,7 @@ namespace Web.Areas.Admin.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
@@ -100,6 +108,7 @@ namespace Web.Areas.Admin.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<ActionResult> Edit(Category c)
         {
             ViewBag.ParentId = new SelectList(await db.Categories.Where(x => x.Status == 1 && x.ParentId == null && x.CategoryId != c.CategoryId).OrderBy(x => x.Orderby).ToListAsync(), "CategoryId", "CategoryName", c.ParentId);
@@ -164,7 +173,7 @@ namespace Web.Areas.Admin.Controllers
             return View(c);
         }
         [HttpPost]
-
+        [AdminAuthorize(Roles = "DELETE")]
         //JSON/Categories/delete category
         public async Task<JsonResult> Delete(int id)
         {
@@ -193,20 +202,19 @@ namespace Web.Areas.Admin.Controllers
                 await db.SaveChangesAsync();
                 return Json(new { success = "Xoá thành công !" }, JsonRequestBehavior.AllowGet);
             }
-            else
-            {
-                return Json(new { error = "Có gì đó không đúng !" }, JsonRequestBehavior.AllowGet);
-            }
+            return Json(new { error = "Có gì đó không đúng !" }, JsonRequestBehavior.AllowGet);
         }
 
         /// <summary>
         /// Categories Parent List and Create new Parnet use JSON
         /// </summary>
         /// <returns></returns>
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult ParentCate()
         {
             return View();
         }
+        [AdminAuthorize(Roles = "VIEW")]
         public async Task<ActionResult> GetdataParentCate()
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -215,10 +223,12 @@ namespace Web.Areas.Admin.Controllers
         }
 
         //View/JSON/Providers/getall
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult Providers()
         {
             return View();
         }
+        [AdminAuthorize(Roles = "VIEW")]
         public async Task<JsonResult> GetdataProviders()
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -227,6 +237,7 @@ namespace Web.Areas.Admin.Controllers
         }
 
         //JSON/Providers/create new provider
+        [AdminAuthorize(Roles = "CREATE")]
         public async Task<JsonResult> CreateProvider(Provider provider)
         {
             if (ModelState.IsValid)
@@ -244,6 +255,7 @@ namespace Web.Areas.Admin.Controllers
         }
 
         //JSON/Providers/Getid
+        [AdminAuthorize(Roles = "UPDATE,DELETE")]
         public async Task<JsonResult> GetIdProvider(int id)
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -251,6 +263,7 @@ namespace Web.Areas.Admin.Controllers
             return Json(provider, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<JsonResult> EditProvider(Provider provider)
         {
             var result = await db.Providers.Where(x => (x.Status == 1 || x.Status == 0) && x.ProviderId == provider.ProviderId).FirstOrDefaultAsync();
@@ -278,6 +291,7 @@ namespace Web.Areas.Admin.Controllers
         }
 
         //JSON/Providers/delete provider
+        [AdminAuthorize(Roles = "DELETE")]
         public async Task<JsonResult> DeleteProvider(int id)
         {
             var provider = await db.Providers.FirstOrDefaultAsync(x => (x.Status == 1 || x.Status == 0) && x.ProviderId == id);
@@ -287,10 +301,7 @@ namespace Web.Areas.Admin.Controllers
                 await db.SaveChangesAsync();
                 return Json(new { success = "Xoá thành công !!" }, JsonRequestBehavior.AllowGet);
             }
-            else
-            {
-                return Json(new { error = "Có gì đó không đúng!!" }, JsonRequestBehavior.AllowGet);
-            }
+            return Json(new { error = "Có gì đó không đúng!!" }, JsonRequestBehavior.AllowGet);
         }
 
     }

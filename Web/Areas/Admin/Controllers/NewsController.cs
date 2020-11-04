@@ -8,20 +8,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using Web.Areas.Admin.Models;
 using Web.Controllers;
 
 namespace Web.Areas.Admin.Controllers
 {
+    [AdminAuthorize]
     public class NewsController : BaseController
     {
         MobileShopContext db = new MobileShopContext();
-        // GET: Admin/News
         #region Newss
+        // GET: Admin/News
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult Index()
         {
             return View();
         }
-
+        [AdminAuthorize(Roles = "VIEW")]
         public JsonResult GetAllNews()
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -48,6 +51,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Create News
         //GET: Admin/Create News
+        [AdminAuthorize(Roles = "CREATE")]
         public ActionResult Create()
         {
             return View();
@@ -57,6 +61,7 @@ namespace Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
+        [AdminAuthorize(Roles = "CREATE")]
         public async Task<ActionResult> Create(News news)
         {
             var user = (User)HttpContext.Session["User"];
@@ -88,6 +93,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Update News
         //GET: Admin/Edit News
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<ActionResult> Edit(int? id)
         {
             var user = (User)HttpContext.Session["User"];
@@ -103,6 +109,7 @@ namespace Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<ActionResult> Edit(News news)
         {
             var user = (User)HttpContext.Session["User"];
@@ -140,6 +147,7 @@ namespace Web.Areas.Admin.Controllers
         #region Delete News
         //JSON: Admin/Delete News
         [HttpPost]
+        [AdminAuthorize(Roles = "DELETE")]
         public async Task<JsonResult> Delete(int? id)
         {
             var user = (User)HttpContext.Session["User"];

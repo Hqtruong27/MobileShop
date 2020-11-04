@@ -9,19 +9,23 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Attribute = Models.Models.DataModels.Attribute;
+using Web.Areas.Admin.Models;
 
 namespace Web.Areas.Admin.Controllers
 {
+    [AdminAuthorize]
     public class TypeAttrController : Controller
     {
         MobileShopContext db = new MobileShopContext();
-        #region TypeAttrs, detail
+        #region TypeAttrs, Id
         // GET: Admin/TypeAttr
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult Index()
         {
             return View();
         }
         // Json: Admin/Getdata TypeAttr
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult Getdata()
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -29,6 +33,7 @@ namespace Web.Areas.Admin.Controllers
             return Json(new { data = result }, JsonRequestBehavior.AllowGet);
         }
         // JSON: Admin/Edit TypeAttr JSON
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<ActionResult> GetId(int id)
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -40,6 +45,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Create
         // Json: Admin/Create TypeAttr
+        [AdminAuthorize(Roles = "CREATE")]
         [HttpPost]
         public async Task<JsonResult> Create(TypeAttr t)
         {
@@ -56,6 +62,7 @@ namespace Web.Areas.Admin.Controllers
         #endregion
 
         #region Update
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<ActionResult> Edit(TypeAttr t)
         {
             var typeattr = await db.TypeAttrs.Where(x => x.TypeId == t.TypeId).SingleOrDefaultAsync();
@@ -88,6 +95,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Delete
         // JSON: Admin/Delete TypeAttr JSON
+        [AdminAuthorize(Roles = "DELETE")]
         [HttpPost]
         public async Task<JsonResult> Delete(int id)
         {
@@ -112,6 +120,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Atributes, detail
         // GET: Admin/Attribute
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult Attribute()
         {
             ViewBag.TypeId = new SelectList(db.TypeAttrs.Where(x => x.Status == 1), "TypeId", "TypeName");
@@ -137,6 +146,7 @@ namespace Web.Areas.Admin.Controllers
         }
         //JSON: Admin/Attribute/EditAttr use JSON
         [HttpPost]
+        [AdminAuthorize(Roles = "UPDATE")]
         public JsonResult GetidAttr(int id)
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -147,6 +157,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Create Atribute
         // JSON: Admin/Attribute/CreateAttr use JSON
+        [AdminAuthorize(Roles = "CREATE")]
         [HttpPost]
         public async Task<JsonResult> CreateAttr(Attribute a)
         {
@@ -165,6 +176,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Update Atribute
         [HttpPost]
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<JsonResult> EditAttr(Attribute a)
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -188,6 +200,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Delete Atribute
         //JSON: Admin/Attribute/DeleteAttr use JSON
+        [AdminAuthorize(Roles = "DELETE")]
         public async Task<JsonResult> DeleteAttr(int id)
         {
             var attrid = await db.Attributes.FindAsync(id);

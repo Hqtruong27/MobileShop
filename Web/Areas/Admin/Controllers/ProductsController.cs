@@ -13,12 +13,13 @@ using Web.Controllers;
 
 namespace Web.Areas.Admin.Controllers
 {
-    [CustomAuth(Roles = "VIEW")]
+    [AdminAuthorize]
     public class ProductsController : BaseController
     {
         MobileShopContext db = new MobileShopContext();
         #region Products
         // GET: Admin/Products
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult Index()
         {
             return View(db.Products.Where(x => x.Status == true).ToList());
@@ -26,7 +27,7 @@ namespace Web.Areas.Admin.Controllers
         #endregion
 
         #region Create Product
-        //[CustomAuth(Roles = "ADD")]
+        [AdminAuthorize(Roles = "CREATE")]
         public async Task<ActionResult> Create()
         {
             var countProvider = await db.Providers.Where(x => x.Status == 1).CountAsync();
@@ -47,10 +48,10 @@ namespace Web.Areas.Admin.Controllers
             ViewBag.TypeAttr = await db.TypeAttrs.Include(x => x.Attributes).Where(x => x.Attributes.Count() > 0).ToListAsync();
             return View();
         }
-        //[CustomAuth(Roles = "ADD")]
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
+        [AdminAuthorize(Roles = "CREATE")]
         public async Task<ActionResult> Create(ProductViewModel p)
         {
             ViewBag.ProviderId = new SelectList(await db.Providers.Where(x => x.Status == 1).ToListAsync(), "ProviderId", "ProviderName");
@@ -98,7 +99,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Update Product
         [ValidateInput(false)]
-        //[CustomAuth(Roles = "EDIT")]
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
@@ -118,7 +119,7 @@ namespace Web.Areas.Admin.Controllers
             return View(product);
         }
 
-        //[CustomAuth(Roles = "EDIT")]
+        [AdminAuthorize(Roles = "UPDATE")]
         [HttpPost]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
@@ -189,7 +190,7 @@ namespace Web.Areas.Admin.Controllers
         #endregion
 
         #region Delete Product
-        //[CustomAuth(Roles = "DELETE")]
+        [AdminAuthorize(Roles = "DELETE")]
         [HttpPost]
         public async Task<JsonResult> Delete(int id)
         {
@@ -202,11 +203,12 @@ namespace Web.Areas.Admin.Controllers
         #endregion
 
         #region Banners
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult Banner()
         {
             return View();
         }
-
+        [AdminAuthorize(Roles = "VIEW")]
         public JsonResult GetAllBanner()
         {
             var banner = db.Banners.Where(x => x.Status == 1 || x.Status == 0);
@@ -215,11 +217,13 @@ namespace Web.Areas.Admin.Controllers
         #endregion
 
         #region Create Banner
+        [AdminAuthorize(Roles = "CREATE")]
         public ActionResult CreateBanner()
         {
             return View();
         }
         [HttpPost]
+        [AdminAuthorize(Roles = "CREATE")]
         public async Task<ActionResult> CreateBanner(Banner banner)
         {
             if (ModelState.IsValid)
@@ -246,6 +250,7 @@ namespace Web.Areas.Admin.Controllers
         #endregion
 
         #region Update Banner
+        [AdminAuthorize(Roles = "UPDATE")]
         public ActionResult EditBanner(int? id)
         {
             if (id == null)
@@ -257,6 +262,7 @@ namespace Web.Areas.Admin.Controllers
             return View(banner);
         }
         [HttpPost]
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<ActionResult> EditBanner(Banner banner)
         {
             var result = await db.Banners.Where(x => x.BannerId == banner.BannerId).FirstOrDefaultAsync();
@@ -294,6 +300,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Delete Banner
         [HttpPost]
+        [AdminAuthorize(Roles = "DELETE")]
         public async Task<JsonResult> DeleteBanner(int id)
         {
             var banner = await db.Banners.FirstOrDefaultAsync(x => x.BannerId == id);

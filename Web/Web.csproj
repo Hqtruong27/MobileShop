@@ -3409,7 +3409,6 @@
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\plugins\fileeditor\codemirror\addon\mode\overlay.js" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\plugins\fileeditor\codemirror\lib\codemirror.css" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\plugins\fileeditor\codemirror\lib\codemirror.js" />
-    <Content Include="Areas\Admin\Assets\plugins\ckfinder\plugins\fileeditor\codemirror\LICENSE" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\plugins\fileeditor\codemirror\mode\clike\clike.js" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\plugins\fileeditor\codemirror\mode\css\css.js" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\plugins\fileeditor\codemirror\mode\htmlmixed\htmlmixed.js" />
@@ -3445,11 +3444,7 @@
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\plugins\imageresize\plugin.js" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\plugins\watermark\logo.gif" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\app.css" />
-    <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\assets\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\assets\fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\assets\fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\assets\fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\assets\fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\host.css" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\images\icons\16\ai.png" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\images\icons\16\avi.png" />
@@ -3674,7 +3669,6 @@
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\v1\skin.js" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\v1\uipanel.css" />
     <Content Include="Areas\Admin\Assets\plugins\ckfinder\translations.txt" />
-    <Content Include="Areas\Admin\Assets\plugins\ckfinder\userfiles\.htaccess" />
     <Content Include="Areas\Admin\Assets\plugins\images\admin-logo-dark.png" />
     <Content Include="Areas\Admin\Assets\plugins\images\admin-logo.png" />
     <Content Include="Areas\Admin\Assets\plugins\images\admin-text-dark.png" />
@@ -4412,6 +4406,12 @@
     <Content Include="Areas\Admin\Views\Home\Feedback.cshtml" />
     <Content Include="Areas\Admin\Views\Home\FeedbackDetail.cshtml" />
     <Content Include="Areas\Admin\Views\Home\_Notifications.cshtml" />
+    <Content Include="Areas\Admin\Assets\plugins\ckfinder\plugins\fileeditor\codemirror\LICENSE" />
+    <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\assets\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\assets\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\assets\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="Areas\Admin\Assets\plugins\ckfinder\skins\bootstrap\assets\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="Areas\Admin\Assets\plugins\ckfinder\userfiles\.htaccess" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
@@ -4562,6 +4562,9 @@
       <Project>{88da61aa-280a-4b54-9ea3-0bd3df86bb3b}</Project>
       <Name>Models</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

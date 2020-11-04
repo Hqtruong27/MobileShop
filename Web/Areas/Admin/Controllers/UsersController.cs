@@ -17,12 +17,14 @@ using WebMatrix.WebData;
 
 namespace Web.Areas.Admin.Controllers
 {
+    [AdminAuthorize]
     public class UsersController : BaseController
     {
         MobileShopContext db = new MobileShopContext();
 
         #region Login User
         // GET: Admin/Users for Users
+        [AllowAnonymous]
         public ActionResult Login()
         {
             if (Session["User"] != null)
@@ -127,6 +129,7 @@ namespace Web.Areas.Admin.Controllers
         #region Send Email
         //send email (non Action)
         [NonAction]
+        [AllowAnonymous]
         public void VerifyLinkEmail(string email, string activeCode, string emailFor)
         {
             var verifyUrl = "/Admin/Users/" + emailFor + "/" + activeCode;
@@ -225,7 +228,6 @@ namespace Web.Areas.Admin.Controllers
 
         #region Change Password
         [HttpPost]
-        [CustomAuth]
         public async Task<ActionResult> ChangePassword(ChangePassword changepwd)
         {
             var curentUser = (User)HttpContext.Session["User"]; // sesin current user
@@ -255,7 +257,6 @@ namespace Web.Areas.Admin.Controllers
 
         #region Info User, Change Info User
         // POST: Admin/Users/ Information current user
-        [CustomAuth]
         public async Task<ActionResult> Index(string userName)
         {
             var InfoUser = (User)HttpContext.Session["User"];
@@ -266,7 +267,6 @@ namespace Web.Areas.Admin.Controllers
             return View(await db.Users.FindAsync(InfoUser.UserId));
         }
         [HttpPost]
-        [CustomAuth]
         public JsonResult ChangeInfoUser(User u, HttpPostedFileBase imageUpload)
         {
             if (Request.Files.Count > 0)
@@ -333,13 +333,13 @@ namespace Web.Areas.Admin.Controllers
         #region List Users
         //ManagerAdmin
         //JSON: Admin/Users/getall User
-        [CustomAuth]
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult UserManager()
         {
             ViewBag.GroupId = new SelectList(db.Groups.Where(x => x.Status == x.Status && x.Status != 5 && x.isAdmin == false), "GroupId", "GroupName");
             return View();
         }
-        [CustomAuth]
+        [AdminAuthorize(Roles = "VIEW")]
         public JsonResult GetdataUser()
         {
             var getuser = HttpContext.Session["User"] as User;
@@ -366,6 +366,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Create User
         // POST: Admin/Users/Create users
+        [AdminAuthorize(Roles = "CREATE")]
         public async Task<ActionResult> Create()
         {
             var countGroupId = await db.Groups.Where(x => x.isAdmin == false && x.Status == 1).CountAsync();
@@ -379,6 +380,7 @@ namespace Web.Areas.Admin.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AdminAuthorize(Roles = "CREATE")]
         public async Task<ActionResult> Create(CreateUser c)
         {
             var countGroupId = await db.Groups.Where(x => x.isAdmin == false && x.Status == 1).CountAsync();
@@ -436,12 +438,14 @@ namespace Web.Areas.Admin.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
+        [AdminAuthorize(Roles = "UPDATE")]
         public ActionResult ChangeStatus(int id)
         {
             db.Configuration.ProxyCreationEnabled = false;
             var result = db.Users.SingleOrDefault(x => x.UserId == id);
             return Json(result, JsonRequestBehavior.AllowGet);
         }
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<JsonResult> ChangeStatusSuccess(User u)
         {
             db.Configuration.ProxyCreationEnabled = false;
@@ -457,6 +461,7 @@ namespace Web.Areas.Admin.Controllers
 
         // JSON: Admin/Users/delete user
         [HttpPost]
+        [AdminAuthorize(Roles = "DELETE")]
         public async Task<JsonResult> DeleteUsers(int id)
         {
             var result = await db.Users.SingleOrDefaultAsync(x => x.UserId == id);

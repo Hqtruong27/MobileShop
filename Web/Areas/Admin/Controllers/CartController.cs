@@ -8,19 +8,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using Web.Areas.Admin.Models;
 
 namespace Web.Areas.Admin.Controllers
 {
+    [AdminAuthorize]
     public class CartController : Controller
     {
         MobileShopContext db = new MobileShopContext();
         // GET: Admin/Get All Cart
         #region List Orders, detail
+        [AdminAuthorize(Roles = "VIEW")]
         public ActionResult Index()
         {
             return View();
         }
-
+        [AdminAuthorize(Roles = "VIEW")]
         public JsonResult Getdata(string isvk)
         {
             var orders = from o in db.Orders select o;
@@ -44,7 +47,7 @@ namespace Web.Areas.Admin.Controllers
             }
             return Json(orders, JsonRequestBehavior.AllowGet);
         }
-
+        [AdminAuthorize(Roles = "VIEW")]
         public async Task<ActionResult> Detail(int? id)
         {
             if (id == null)
@@ -59,6 +62,7 @@ namespace Web.Areas.Admin.Controllers
             return View(order);
         }
         [HttpPost]
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<JsonResult> GetId(int id)
         {
             var order = await db.Orders.Where(x => x.OrderId == id).FirstOrDefaultAsync();
@@ -72,6 +76,7 @@ namespace Web.Areas.Admin.Controllers
 
         #region Change Status Order
         [HttpPost]
+        [AdminAuthorize(Roles = "UPDATE")]
         public async Task<JsonResult> ChangeStatusOrder(Order order)
         {
             var dbOrder = await db.Orders.Where(x => x.OrderId == order.OrderId).FirstOrDefaultAsync();

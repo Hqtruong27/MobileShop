@@ -12,7 +12,7 @@ using Web.Areas.Admin.Models;
 
 namespace Web.Areas.Admin.Controllers
 {
-    [CustomAuth]
+    [AdminAuthorize]
     public class GroupsController : Controller
     {
         MobileShopContext db = new MobileShopContext();

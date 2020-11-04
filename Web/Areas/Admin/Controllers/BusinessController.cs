@@ -11,6 +11,7 @@ using Web.Areas.Admin.Models;
 
 namespace Web.Areas.Admin.Controllers
 {
+    [AdminAuthorize]
     public class BusinessController : Controller
     {
         MobileShopContext db = new MobileShopContext();

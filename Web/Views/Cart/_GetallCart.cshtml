@@ -31,14 +31,14 @@
         </td>
         <td class="product-quantity" data-title="Số lượng">
             <div class="quantity">
-                <input style="display:inline" type="" min="" name="Quantity" value="@item.Quantity" id="Quantity" class="input-text qty text">
+                <input style="outline:none;border-radius:unset;border:1px solid #d3d3d3" min="" name="Quantity" value="@item.Quantity" id="Quantity" class="input-text qty text">
             </div>
         </td>
         <td class="product-subtotal" data-title="Tổng cộng">
             <span class="woocommerce-Price-amount amount">@String.Format(info, "{0:c00}", price)</span>
         </td>
         <td colspan="6" class="actions">
-            <input data-id="@item.CartId" type='submit' class='button btn-submit _update_cart' name='update_cart' value='Cập nhật'>
+            <input style="border-radius:unset" data-id="@item.CartId" type='submit' class='button btn-submit _update_cart' name='update_cart' value='Cập nhật'>
         </td>
     </tr>
 }
@@ -58,8 +58,8 @@
                             </tr>
                             <tr>
                                 <td></td>
-                                <td class="actions right">
-                                    <a href="@Url.Action("Payment","Cart")" class="btn btn-success btn-lg">Thanh toán</a>
+                                <td class="actions right" style="padding-right: 0px;margin-right: -7px;margin-left: 45px;">
+                                    <a style="border-radius:unset;" href="@Url.Action("Payment","Cart")" class="btn btn-success btn-lg">Thanh toán</a>
                                 </td>
                             </tr>
                         </tbody>

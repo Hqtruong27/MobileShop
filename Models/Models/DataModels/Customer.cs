@@ -29,9 +29,8 @@ namespace Models.Models.DataModels
 
         [DisplayName("Ngày Sinh")]
         [DataType(DataType.Date)]
-        [DateMinimumAge(18)]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{dd/MM/yyyy}")]
-        public DateTime DateofBirth { get; set; }
+        public DateTime? DateofBirth { get; set; }
         
         public DateTime? ExpiredTime { get; set; }
 

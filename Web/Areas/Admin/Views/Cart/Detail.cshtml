@@ -5,7 +5,7 @@
     double totalPrice = 0;
     var vie = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
     var statusOrders = "";
-    if (Model.Status ==-2)
+    if (Model.Status == -2)
     {
         statusOrders = "<span class='text-danger'>Khách hàng huỷ</span>";
     }
@@ -30,7 +30,7 @@
 
 <div class="col-md-12">
     <div class="white-box printableArea">
-        <h3><b style="font-family:Arial;font-weight:bold">MÃ ĐƠN HÀNG</b> <span class="pull-right" style="font-family:Arial">@Html.Raw(statusOrders)   #@Model.CodeOrder</span></h3>
+        <h3><b style="font-family:Arial;font-weight:bold">MÃ ĐƠN HÀNG</b> <span class="pull-right _status_Order" style="font-family:Arial">@Html.Raw(statusOrders)   #@Model.CodeOrder</span></h3>
         <hr>
         <div class="row">
             <div class="col-md-12">
@@ -45,7 +45,6 @@
                             <br /> <label class="font-bold">Số điện thoại</label>: @Model.Phone
                             <br /> <span class="font-bold">Địa chỉ nhận hàng:</span><br />
                             <span style="max-width:350px;word-break:keep-all">@Model.Address</span>
-
                         </p>
                     </address>
                 </div>
@@ -83,7 +82,6 @@
                                             @String.Format(vie, "{0:c00}", item.Price * item.Quantity);
                                             totalPrice += item.Price * item.Quantity;
                                         }
-
                                     </td>
                                 </tr>
                             }
@@ -165,12 +163,13 @@
                     };
                     $("div.printableArea").printArea(options);
                 });
+
                 //get id and value
-                $('button.change-status-order').on('click', function (e) {
+                $(document).on('click', '#load_btn', function(e) {
                     e.preventDefault();
                     var id = $(this).data("id");
                     $.ajax({
-                        type: "POSt",
+                        type: "POST",
                         url: "@Url.Action("GetId", "Cart")/" + id,
                         success: function (res) {
                             $("#getOrderId").val(res.OrderId);
@@ -199,7 +198,7 @@
                             $("#myModal").modal("show");
                         }
                     })
-                })
+                });
 
                 //change status order
                 $("#confirm-order").on('click', function () {
@@ -217,6 +216,7 @@
                                 })
                                 $(".re-load-noti-od-fb").load('@Url.Action("Detail", "Cart") .re-load-noti-od-fb');
                                 $(".load-btn-handle").load('@Url.Action("Detail", "Cart") .load-btn-handle');
+                                $("._status_Order").load('@Url.Action("Detail", "Cart") ._status_Order');
                                 $("#myModal").modal("hide");
                             } else {
                                 $('.notifyjs-wrapper').remove();

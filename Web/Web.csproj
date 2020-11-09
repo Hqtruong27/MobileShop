@@ -186,7 +186,6 @@
     <Compile Include="Areas\Admin\Models\RouteConstraint.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CartController.cs" />
-    <Compile Include="Controllers\CategoriesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Global.asax.cs">
@@ -2564,58 +2563,6 @@
     <Content Include="Areas\Admin\Assets\plugins\bower_components\waypoints\lib\waypoints.debug.js" />
     <Content Include="Areas\Admin\Assets\plugins\bower_components\waypoints\lib\zepto.waypoints.js" />
     <Content Include="Areas\Admin\Assets\plugins\bower_components\waypoints\lib\zepto.waypoints.min.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\bootstrap-editable\css\bootstrap-editable.css" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\bootstrap-editable\img\clear.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\bootstrap-editable\img\loading.gif" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\bootstrap-editable\js\bootstrap-editable.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\bootstrap-editable\js\bootstrap-editable.min.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\bootstrap3-editable\css\bootstrap-editable.css" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\bootstrap3-editable\img\clear.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\bootstrap3-editable\img\loading.gif" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\bootstrap3-editable\js\bootstrap-editable.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\bootstrap3-editable\js\bootstrap-editable.min.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\address\address.css" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\address\address.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\typeaheadjs\lib\typeahead.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\typeaheadjs\lib\typeahead.js-bootstrap.css" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\typeaheadjs\typeaheadjs.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\wysihtml5\bootstrap-wysihtml5-0.0.2\bootstrap-wysihtml5-0.0.2.css" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\wysihtml5\bootstrap-wysihtml5-0.0.2\bootstrap-wysihtml5-0.0.2.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\wysihtml5\bootstrap-wysihtml5-0.0.2\bootstrap-wysihtml5-0.0.2.min.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\wysihtml5\bootstrap-wysihtml5-0.0.2\wysihtml5-0.3.0.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\wysihtml5\bootstrap-wysihtml5-0.0.2\wysihtml5-0.3.0.min.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\wysihtml5\bootstrap-wysihtml5-0.0.2\wysiwyg-color.css" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\inputs-ext\wysihtml5\wysihtml5.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\css\jquery-editable.css" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\img\clear.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\img\loading.gif" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\animated-overlay.gif" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-bg_flat_0_aaaaaa_40x100.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-bg_flat_55_fbec88_40x100.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-bg_glass_75_d0e5f5_1x400.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-bg_glass_85_dfeffc_1x400.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-bg_glass_95_fef1ec_1x400.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-bg_gloss-wave_55_5c9ccc_500x100.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-bg_inset-hard_100_f5f8f9_1x100.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-bg_inset-hard_100_fcfdfd_1x100.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-icons_217bc0_256x240.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-icons_2e83ff_256x240.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-icons_469bdd_256x240.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-icons_6da8d5_256x240.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-icons_d8e7f3_256x240.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\images\ui-icons_f9bd01_256x240.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\jquery-ui-1.10.3.custom.css" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\css\redmond\jquery-ui-1.10.3.custom.min.css" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\js\jquery-ui-1.10.3.custom.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\jquery-ui-datepicker\js\jquery-ui-1.10.3.custom.min.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\js\jquery-editable-poshytip.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jquery-editable\js\jquery-editable-poshytip.min.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jqueryui-editable\css\jqueryui-editable.css" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jqueryui-editable\img\clear.png" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jqueryui-editable\img\loading.gif" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jqueryui-editable\js\jqueryui-editable.js" />
-    <Content Include="Areas\Admin\Assets\plugins\bower_components\x-editable\dist\jqueryui-editable\js\jqueryui-editable.min.js" />
     <Content Include="Areas\Admin\Assets\plugins\ckeditor\adapters\jquery.js" />
     <Content Include="Areas\Admin\Assets\plugins\ckeditor\build-config.js" />
     <Content Include="Areas\Admin\Assets\plugins\ckeditor\ckeditor.js" />
@@ -4544,6 +4491,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Areas\Admin\Assets\plugins\bower_components\x-editable\" />
     <Folder Include="Content\uploads\product\" />
   </ItemGroup>
   <ItemGroup>

@@ -47,8 +47,9 @@ namespace Web.Controllers
                 {
                     var current = await db.Customers.FindAsync(int.Parse(id));
                     current.FullName = c.FullName;
-                    current.DateofBirth = c.DateofBirth;
+                    //current.DateofBirth = c.DateofBirth;
                     current.Gender = c.Gender;
+                    current.Phone = c.Phone;
                     if (imageUpload != null)
                     {
                         string filename = Path.GetFileNameWithoutExtension(imageUpload.FileName);
@@ -320,19 +321,20 @@ namespace Web.Controllers
             {
                 try
                 {
-                    Customer cus = new Customer();
                     if (await db.Customers.AnyAsync(x => x.Email == c.Email))
                     {
                         setAlert("Lỗi!", "Email đã được sử dụng.", "bottom-left", "error", 12000);
                         return View(c);
                     }
-                    cus.FullName = c.FullName;
-                    cus.Email = c.Email;
-                    var pwd = BCrypt.Net.BCrypt.HashPassword(c.Password);
-                    cus.Password = pwd;
-                    cus.CreateDate = DateTime.Now;
-                    cus.Status = 1;
-                    db.Customers.Add(cus);
+                    Customer customer = new Customer()
+                    {
+                        FullName = c.FullName,
+                        Email = c.Email,
+                        Password = BCrypt.Net.BCrypt.HashPassword(c.Password),
+                        CreateDate = DateTime.Now,
+                        Status = 1
+                    };
+                    db.Customers.Add(customer);
                     await db.SaveChangesAsync();
                     if (Request.Cookies["Email"] != null)
                     {
@@ -341,9 +343,9 @@ namespace Web.Controllers
                     setAlert("Success", "Đăng ký tài khoản thành công !", "bottom-left", "success", 5000);
                     return RedirectToAction("Login");
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Có lỗi khi đăng ký, vui lòng thử lại sau !");
+                    ModelState.AddModelError("", ex.InnerException);
                     return View(c);
                 }
             }
@@ -518,7 +520,7 @@ namespace Web.Controllers
             var success = "";
             if (ModelState.IsValid)
             {
-                var cus =  await db.Customers.Where(x => x.ResetPasswordCode == model.ResetCode).FirstOrDefaultAsync();
+                var cus = await db.Customers.Where(x => x.ResetPasswordCode == model.ResetCode).FirstOrDefaultAsync();
                 if (cus != null)
                 {
                     if (cus.ExpiredTime < DateTime.Now)

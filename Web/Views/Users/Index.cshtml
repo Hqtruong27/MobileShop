@@ -34,7 +34,7 @@
                                     <div class="input-with-label">
                                         <div class="input-with-label__wrapper">
                                             <div class="input-with-label__label">
-                                                <label>Tên đăng nhập</label>
+                                                <label>Tên người dùng</label>
                                             </div><div class="input-with-label__content">
                                                 <div class="my-account__inline-container">
                                                     <div class="my-account__input-text">
@@ -67,19 +67,13 @@
                                             </div>
                                             <div class="input-with-label__content">
                                                 <div class="my-account__inline-container">
-                                                    @if (Model.Phone == null)
-                                                    {
-                                                        <div class="my-account__input-text">
+                                                    <div class="my-account__input-text">
+                                                        <div class="input-with-validator">
+                                                            <input name="Phone" placeholder="@Model.Phone" style="box-shadow: none;width:1000px; max-width:358px" type="text" value="@Model.Phone">
                                                         </div>
-                                                        <button class="my-account__no-background-button my-account-profile__change-button">Thêm mới</button>
-                                                    }
-                                                    else
-                                                    {
-                                                        <div class="my-account__input-text">
-                                                            @Model.Phone
-                                                            <button class="my-account__no-background-button my-account-profile__change-button">Thay đổi</button>
-                                                        </div>
-                                                    }
+                                                        <br />
+                                                        @Html.ValidationMessageFor(model => model.Phone, "", new { @class = "text-danger" })
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -146,7 +140,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="input-with-label">
+                                    @*<div class="input-with-label">
                                         <div class="input-with-label__wrapper">
                                             <div class="input-with-label__label">
                                                 <label>Ngày sinh</label>
@@ -154,13 +148,14 @@
                                             <div class="input-with-label__content">
                                                 <div class="input-with-validator-wrapper">
                                                     <div class="input-with-validator">
-                                                        <input type="date" name="DateofBirth" value="@Model.DateofBirth.ToString("yyyy-MM-dd")">
+                                                        @{var dob = Model.DateofBirth != null ? Model.DateofBirth : new DateTime(1960, 01, 01) }
+                                                        <input type="date" name="DateofBirth" value="@dob">
                                                     </div>
                                                     @Html.ValidationMessageFor(model => model.DateofBirth, "", new { @class = "text-danger" })
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div>*@
 
                                 </div>
                                 <div class="my-account-profile__right">

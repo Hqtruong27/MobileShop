@@ -29,8 +29,8 @@
                                                     <th class="product-name">Sản phẩm</th>
                                                     <th class="product-price">Giá</th>
                                                     <th class="product-quantity">Số lượng</th>
-                                                    <th class="product-subtotal">Tổng cộng</th>
-                                                    <th class="product-subtotal">Tổng cộng</th>
+                                                    <th class="product-subtotal">Tạm tính</th>
+                                                    <th class="product-subtotal">Trạng thái</th>
                                                 </tr>
                                             </thead>
                                         }
@@ -64,24 +64,18 @@
 
 <div class="modal fade" id="modelDelete">
     <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-
+        <div class="modal-content" style="border-radius:unset;box-shadow: 3px, 3px, 2px, 0px #b3b3b3">
             <!-- Modal Header -->
             <div class="modal-body">
-                <h4 class="modal-title text-danger bold">Thông báo</h4>
+                <h4 class="modal-title" style="font-weight:700;font-size:20px;color:#4e4949">Thông báo</h4>
             </div>
-
             <!-- Modal body -->
-            <div class="modal-body text-success">
-                Bạn chắc chắn muốn bỏ sản phẩm này?
-            </div>
-
+            <div class="modal-body message_text" style="color: #a92929"></div>
             <!-- Modal footer -->
             <div class="modal-footer col-auto">
-                <button id="confirmdelete" type="button" class="btn btn-info">Có</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Không</button>
+                <button id="confirmdelete" type="button" class="btn btn-info"style="border-radius:unset;border: 1px solid #b3b3b3;outline:unset">Ok</button>
+                <button id="hidden-button" type="button" class="btn btn-default" style="border-radius:unset;border: 1px solid #b3b3b3;outline:unset" data-dismiss="modal">Không</button>
             </div>
-
         </div>
     </div>
 </div>
@@ -91,6 +85,7 @@
     <script src="~/Areas/Admin/Assets/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="~/Areas/Admin/Assets/js/notify.min.js" charset="utf-8"></script>
     <script>
+        const htmlmsg = document.querySelector(".message_text")
         $(document).ready(function () {
             function GetAll() {
                 $.ajax({
@@ -103,14 +98,15 @@
             }
             GetAll();
             function validateForm() {
-
-                var z = document.getElementById("Quantity").value
-
-                if (!/^[0-9]+$/.test(z)) {
-                    alert("Vui lòng chọn số hợp lệ")
+                const valueQty = document.querySelector("#Quantity").value
+                const message = "Vui lòng chọn số hợp lệ"
+                if (!/^[0-9]+$/.test(valueQty)) {
+                    htmlmsg.innerHTML = message
+                    document.querySelector("#confirmdelete").style.display = "none";
+                    $("#hidden-button").html('Ok')
+                    $("#modelDelete").modal('show')
                     GetAll();
                 }
-
             }
             //test update
             $(document).on('click','._update_cart', function (e) {
@@ -124,7 +120,6 @@
                         url: "@Url.Action("UpdateQuantity","Cart")",
                         data: { id: carId, quantity: qty },
                         dataType: "JSON",
-
                         success: function (res) {
                             if (res.success) {
                                 $('.notifyjs-wrapper').remove();
@@ -132,6 +127,7 @@
                                     globalPosition: "top center",
                                     className: "success",
                                 })
+                                $(".card_content_load").load("@Url.Action("Index","Cart") .card_content_load_pvagain");
                                 GetAll();
                             } else {
                                 $('.notifyjs-wrapper').remove();
@@ -149,7 +145,11 @@
             $(document).on('click', 'a.remove-cart-product', function (e) {
                 e.preventDefault();
                 id = $(this).data("product_id");
-                $("#modelDelete").modal('show');
+                const message = "Bạn chắc chắn muốn bỏ sản phẩm này?"
+                htmlmsg.innerHTML = message
+                $("#hidden-button").html('Không')
+                document.querySelector("#confirmdelete").style.display = null;
+                $("#modelDelete").modal('show')
             });
             //Confirm delete
             $(document).on('click', '#confirmdelete', function () {

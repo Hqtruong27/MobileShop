@@ -51,7 +51,7 @@ namespace Web.Controllers
             {
                 return HttpNotFound();
             }
-            var products =  from p in await db.Products.Where(x => x.Status == true).OrderBy(x => x.CreateDate).ToListAsync()
+            var products = from p in await db.Products.Where(x => x.Status == true).OrderBy(x => x.CreateDate).ToListAsync()
                            select p;
             switch (orderby)
             {
@@ -65,7 +65,7 @@ namespace Web.Controllers
                     break;
                 case "date":
                     ViewBag.date = "selected";
-                    products = products.OrderBy(p => p.CreateDate).Where(p => p.CategoryId == id);
+                    products = products.OrderByDescending(p => p.CreateDate).Where(p => p.CategoryId == id);
                     break;
                 case "popularity":
                     ViewBag.popularity = "selected";
@@ -105,7 +105,7 @@ namespace Web.Controllers
                     break;
                 case "date":
                     ViewBag.date = "selected";
-                    products = products.OrderBy(p => p.CreateDate).Where(p => p.ProviderId == id);
+                    products = products.OrderByDescending(p => p.CreateDate).Where(p => p.ProviderId == id);
                     break;
                 case "popularity":
                     ViewBag.popularity = "selected";
@@ -150,14 +150,14 @@ namespace Web.Controllers
         [HttpPost]
         [CustomersAutherize]
         [ValidateAntiForgeryToken]
-        public ActionResult Productsdetail(int? id, int quantity)
+        public async Task<ActionResult> Productsdetail(int? id, int quantity)
         {
             if (id == null)
             {
                 return RedirectToAction("Index", "Home");
             }
             //Tìm sản phẩm cần mua
-            var product = db.Products.Include(x => x.Categories).Include(x => x.ProductAttrs).Where(x => x.Status == true).FirstOrDefault(x => x.ProductId == id);
+            var product = await db.Products.Include(x => x.Categories).Include(x => x.ProductAttrs).Where(x => x.Status == true).FirstOrDefaultAsync(x => x.ProductId == id);
             if (product == null)
             {
                 return RedirectToAction("Index", "Home");
@@ -180,7 +180,7 @@ namespace Web.Controllers
             HttpCookie cookie = Request.Cookies["InfoCustomer"];
             var userId = cookie["id"];
             var parseIntUser = int.Parse(userId);
-            var checkCustomer = db.Customers.Where(x => x.CustomerId == parseIntUser && x.Status != 10).SingleOrDefault();
+            var checkCustomer = await db.Customers.FirstOrDefaultAsync(x => x.CustomerId == parseIntUser && x.Status != 10);
             if (checkCustomer == null)
             {
                 Response.Cookies["InfoCustomer"].Expires = DateTime.Now.AddDays(-2);
@@ -197,7 +197,7 @@ namespace Web.Controllers
             if (getAttr.Length > 0)
             {
                 int intAttrId = int.Parse(getAttr);
-                var findAttrId = db.Attributes.Where(x => x.Status == 1 && x.AttrId == intAttrId).FirstOrDefault();
+                var findAttrId = await db.Attributes.FirstOrDefaultAsync(x => x.Status == 1 && x.AttrId == intAttrId);
                 var attrName = findAttrId != null ? findAttrId.AttrName : "";
                 atc.AttrName = attrName;
             }
@@ -210,11 +210,10 @@ namespace Web.Controllers
             atc.Quantity = quantity;
             atc.CustomerId = int.Parse(userId);
             //Kiểm trả giỏ hàng của người dùng hiện tại đã có sản phẩm hay chưa
-            var cart = db.AddToCarts.Any();
-            if (cart)
+            if (await db.AddToCarts.AnyAsync())
             {
                 //Lấy tất cả sản phẩm hiện tại của customer hiện tại
-                var listCart = db.AddToCarts.Where(x => x.CustomerId == parseIntUser).ToList();
+                var listCart = await db.AddToCarts.Where(x => x.CustomerId == parseIntUser).ToListAsync();
                 bool check = false;
                 foreach (var item in listCart)
                 {
@@ -224,20 +223,20 @@ namespace Web.Controllers
                         check = true;
                         //Cập nhập số lượng
                         item.Quantity += atc.Quantity;
-                        db.SaveChanges();
+                        await db.SaveChangesAsync();
                     }
                 }
                 //Nếu không sản phẩm hiện tại không trùng
                 if (!check)
                 {
                     db.AddToCarts.Add(atc);
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                 }
             }
             else
             {
                 db.AddToCarts.Add(atc);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
             return RedirectToAction("Index", "Cart");
         }

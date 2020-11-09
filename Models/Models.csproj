@@ -74,6 +74,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Migrations\202011070354152_initial.cs" />
+    <Compile Include="Migrations\202011070354152_initial.Designer.cs">
+      <DependentUpon>202011070354152_initial.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="MobileShopContext.cs" />
     <Compile Include="Models\DataModels\AddToCart.cs" />
@@ -103,6 +107,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202011070354152_initial.resx">
+      <DependentUpon>202011070354152_initial.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

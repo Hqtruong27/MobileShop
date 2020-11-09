@@ -18,7 +18,7 @@ namespace Web.Areas.Admin.Controllers
         MobileShopContext db = new MobileShopContext();
         #region Group Roles
         // GET: Admin/Groups
-        public async System.Threading.Tasks.Task<ActionResult> Index()
+        public async Task<ActionResult> Index()
         {
             var user = HttpContext.Session["User"] as User;
             if (user.IsAdmin != true) return View("Unauthorized");
@@ -83,6 +83,7 @@ namespace Web.Areas.Admin.Controllers
         // POST: Admin/Roles/Get id group
         public JsonResult GetId(string id)
         {
+            db.Configuration.ProxyCreationEnabled = false;
             var data = db.Groups.Where(x => (x.Status == 1 || x.Status == 0) && x.GroupId == id).SingleOrDefault();
             return Json(data, JsonRequestBehavior.AllowGet);
         }

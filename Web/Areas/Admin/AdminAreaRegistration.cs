@@ -22,10 +22,9 @@ namespace Web.Areas.Admin
                 new { controller = "Users", action = "Login", id = UrlParameter.Optional },
                 new[] { "Web.Areas.Admin.Controllers" }
             );
-           
            // context.MapRoute(
            //    "Users_default",
-           //    "Admin/{controller}/{action}/{userName}",
+           //    "Admin/{userName}",
            //    new { controller = "Users", action = "Index", id = UrlParameter.Optional },
            //    new[] { "Web.Areas.Admin.Controllers" }
            //);

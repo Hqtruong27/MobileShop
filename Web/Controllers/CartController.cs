@@ -51,35 +51,30 @@ namespace Web.Controllers
         [HttpPost]
         public ActionResult UpdateQuantity(int? id, int quantity)
         {
-            if (id == null)
-            {
-                return Json(new { error = "Sản phẩm không tồn tại !!" }, JsonRequestBehavior.AllowGet);
-            }
+            if (id == null) return Json(new { error = "Sản phẩm không tồn tại !!" }, JsonRequestBehavior.AllowGet);
             try
             {
                 var result = db.AddToCarts.Where(x => x.CartId == id).FirstOrDefault();
                 if (result != null)
                 {
-                    if (quantity >= 0)
+                    if (quantity < 0) return Json(new { error = "Số lượng phải lớn hơn 0 !!" }, JsonRequestBehavior.AllowGet);
+                    if (quantity > 99) return Json(new { error = "Số lượng quá lớn, bạn chỉ có thể mua tối đa 99 sản phẩm" }, JsonRequestBehavior.AllowGet);
+                    if (quantity == 0)
                     {
-                        if (quantity == 0)
-                        {
-                            db.AddToCarts.Remove(result);
-                            db.SaveChanges();
-                            return Json(new { success = "Đã xoá sản phẩm" }, JsonRequestBehavior.AllowGet);
-                        }
-                        result.Quantity = quantity;
+                        db.AddToCarts.Remove(result);
                         db.SaveChanges();
-                        return Json(new { success = "Cập nhập thành công" }, JsonRequestBehavior.AllowGet);
+                        return Json(new { success = "Đã xoá sản phẩm" }, JsonRequestBehavior.AllowGet);
                     }
-                    return Json(new { error = "Vui lòng chọn số lượng !!" }, JsonRequestBehavior.AllowGet);
+                    result.Quantity = quantity;
+                    db.SaveChanges();
+                    return Json(new { success = "Cập nhập thành công" }, JsonRequestBehavior.AllowGet);
                 }
+                return Json(new { error = "Sản phẩm không tồn tại" }, JsonRequestBehavior.AllowGet);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return Json(new { error = "Có gì đó không đúng !!" }, JsonRequestBehavior.AllowGet);
+                return Json(new { error = ex.InnerException }, JsonRequestBehavior.AllowGet);
             }
-            return Json(new { error = "Có gì đó không đúng !!" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 

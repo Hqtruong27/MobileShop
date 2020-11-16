@@ -257,14 +257,11 @@ namespace Web.Areas.Admin.Controllers
 
         #region Info User, Change Info User
         // POST: Admin/Users/ Information current user
-        public async Task<ActionResult> Index(string userName)
+        public async Task<ActionResult> Index()
         {
-            var InfoUser = (User)HttpContext.Session["User"];
-            if (InfoUser == null)
-            {
-                return View("Unauthorized");
-            }
-            return View(await db.Users.FindAsync(InfoUser.UserId));
+            var InforUser = (User)HttpContext.Session["User"];
+            if (InforUser == null) return View("Unauthorized");
+            return View(await db.Users.FindAsync(InforUser.UserId));
         }
         [HttpPost]
         public JsonResult ChangeInfoUser(User u, HttpPostedFileBase imageUpload)

@@ -22,7 +22,7 @@ namespace Web.Controllers
         #region Info Customer
         // GET: Users/ information current user
         [CustomersAutherize]
-        public ActionResult Index()
+        public ActionResult Index(string email)
         {
             int? id = int.Parse(Request.Cookies["InfoCustomer"]["Id"]);
             if (id == null)

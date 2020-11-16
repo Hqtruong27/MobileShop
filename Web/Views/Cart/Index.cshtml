@@ -15,15 +15,15 @@
                         </div>
                         <div class="clear"></div>
                         <h1>Giỏ hàng</h1>
-                        <div class="img-responsive">
-                            <div class="woocommerce rel_table_cart">
+                        <div class="img-responsive reload_cart">
+                            <div class="woocommerce reload_cart__rel_table_cart">
                                 @using (Html.BeginForm("UpdateQuantity", "Cart", FormMethod.Post, new { @id = "formsubmit" }))
                                 {
                                     <table id="reload_table_cart" class="shop_table shop_table_responsive cart l_current_tb_cart" cellspacing="0">
-                                        @if (String.IsNullOrEmpty(ViewBag.cartnull))
-                                        {
-                                            <thead class="l_current_thead_cart">
-                                                <tr>
+                                        <thead class="l_current_thead_cart">
+                                            @if (String.IsNullOrEmpty(ViewBag.cartnull))
+                                            {
+                                                <tr class="l_current_thead_cart_tr">
                                                     <th class="product-remove">&nbsp;</th>
                                                     <th class="product-thumbnail">&nbsp;</th>
                                                     <th class="product-name">Sản phẩm</th>
@@ -32,19 +32,8 @@
                                                     <th class="product-subtotal">Tạm tính</th>
                                                     <th class="product-subtotal">Trạng thái</th>
                                                 </tr>
-                                            </thead>
-                                        }
-                                        else
-                                        {
-                                            <tr>
-                                                <td>
-                                                    @ViewBag.cartnull
-                                                </td>
-                                                <td class="actions">
-                                                    <a href="@Url.Action("Index", "Home")">Trang chủ</a>
-                                                </td>
-                                            </tr>
-                                        }
+                                            }
+                                        </thead>
                                         <tbody id="cartView"></tbody>
                                     </table>
                                 }
@@ -73,7 +62,7 @@
             <div class="modal-body message_text" style="color: #a92929"></div>
             <!-- Modal footer -->
             <div class="modal-footer col-auto">
-                <button id="confirmdelete" type="button" class="btn btn-info"style="border-radius:unset;border: 1px solid #b3b3b3;outline:unset">Ok</button>
+                <button id="confirmdelete" type="button" class="btn btn-info" style="border-radius:unset;border: 1px solid #b3b3b3;outline:unset">Ok</button>
                 <button id="hidden-button" type="button" class="btn btn-default" style="border-radius:unset;border: 1px solid #b3b3b3;outline:unset" data-dismiss="modal">Không</button>
             </div>
         </div>
@@ -99,22 +88,27 @@
             GetAll();
             function validateForm() {
                 const valueQty = document.querySelector("#Quantity").value
-                const message = "Vui lòng chọn số hợp lệ"
-                if (!/^[0-9]+$/.test(valueQty)) {
-                    htmlmsg.innerHTML = message
-                    document.querySelector("#confirmdelete").style.display = "none";
-                    $("#hidden-button").html('Ok')
+                const msg = "Vui lòng chọn số hợp lệ"
+                if (!/^(\d?[1-9]|[1-9]0)$/.test(valueQty)) {
+                    errorMessage(msg)
                     $("#modelDelete").modal('show')
-                    GetAll();
+                    GetAll()
                 }
             }
             //test update
             $(document).on('click','._update_cart', function (e) {
                 e.preventDefault();
+                const carId = $(this).data("id");
+                const valueQty = document.querySelector("#Quantity").value;
                 validateForm();
-                var carId = $(this).data("id");
-                var qty = $("#Quantity").val();
-                if (qty >= 0 || id != undefined) {
+                const qty = parseInt(valueQty);
+                if (qty > 99) {
+                    const msg = "Số lượng quá lớn, bạn chỉ có thể chọn tối đa 99 sản phẩm"
+                    errorMessage(msg)
+                    GetAll()
+                    return false;
+                }
+                if (valueQty >= 0 && carId != undefined) {
                     $.ajax({
                         type: "post",
                         url: "@Url.Action("UpdateQuantity","Cart")",
@@ -160,13 +154,13 @@
                         data: { id: id },
                         success: function (res) {
                             if (res.success) {
-                                $(".rel_table_cart").load("@Url.Action("Index","Cart") .l_current_tb_cart");
-                                $(".card_content_load").load("@Url.Action("Index","Cart") .card_content_load_pvagain");
                                 $.notify(res.success, {
                                     globalPosition: "top center",
                                     className: "success",
                                 })
-                                GetAll();
+                                $(".l_current_thead_cart").load("@Url.Action("Index","Cart") .l_current_thead_cart_tr")
+                                $(".card_content_load").load("@Url.Action("Index","Cart") .card_content_load_pvagain")
+                                GetAll()
                                 $("#modelDelete").modal('hide');
                             } else {
                                 $.notify(res.error, {
@@ -183,6 +177,18 @@
                     })
                 }
             })
+            function sleep(ms) {
+                return new Promise(
+                    resolve => setTimeout(resolve, ms)
+                );
+            }
+            async function errorMessage(msg) {
+                htmlmsg.innerHTML = msg
+                document.querySelector("#confirmdelete").style.display = "none";
+                $("#modelDelete").modal('show')
+                //await sleep(2000);
+                $("#hidden-button").html('Ok')
+            }
         })
     </script>
 }

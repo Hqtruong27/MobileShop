@@ -3,17 +3,17 @@ using Models.Models.DataModels;
 using Models.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
-using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 using Web.Areas.Admin.Models;
+using Web.Common;
 using Web.Controllers;
-using WebMatrix.WebData;
 
 namespace Web.Areas.Admin.Controllers
 {
@@ -127,34 +127,7 @@ namespace Web.Areas.Admin.Controllers
         #endregion
 
         #region Send Email
-        //send email (non Action)
-        [NonAction]
-        [AllowAnonymous]
-        public void VerifyLinkEmail(string email, string activeCode, string emailFor)
-        {
-            var verifyUrl = "/Admin/Users/" + emailFor + "/" + activeCode;
-            var link = Request.Url.AbsoluteUri.Replace(Request.Url.PathAndQuery, verifyUrl);
-            var fromEmail = new MailAddress("c1709h@gmail.com", "ResetPassWord no-reply");
-            var toEmail = new MailAddress(email);
-            string subject = "";
-            string body = "";
-            if (emailFor == "ResetPassword")
-            {
-                subject = "Reset Password";
-                body = "<br/><br/>Đã có một yêu cầu đặt đặt lại mật khẩu web Mobile Shop" +
-            "nếu đó là bạn, vui lòng click vào link bên dưới" +
-            " <br/><br/><a href='" + link + "'>" + link + "</a>";
-            }
-            var smpt = new SmtpClient();
-            var message = new MailMessage(fromEmail, toEmail)
-            {
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = true
-            };
-            smpt.Send(message);
-
-        }
+        
         #endregion
 
         #region ForgotPassword
@@ -174,13 +147,15 @@ namespace Web.Areas.Admin.Controllers
             var emailUser = await db.Users.Where(x => x.Email == email).SingleOrDefaultAsync();
             if (emailUser != null)
             {
-                ///Send email for reser pwd
-                string resetCode = Guid.NewGuid().ToString();
-                VerifyLinkEmail(emailUser.Email, resetCode, "ResetPassword");
+                //Send email for reset pwd
+                var resetCode = Email.ResetCode();
+                var verifyUrl = "/Admin/Users/ResetPassword/" + resetCode;
+                var link = Request.Url.AbsoluteUri.Replace(Request.Url.PathAndQuery, verifyUrl);
+                Email.VerifySendEmail(emailUser.Email, "ResetPasswordAdmin", link);
                 emailUser.ResetPasswordCode = resetCode;
                 db.Configuration.ValidateOnSaveEnabled = false;
                 await db.SaveChangesAsync();
-                success = "Một email đã được gửi đến hộp thư của bạn, vui lòng kiểm tra hộp thư đến trong Email";
+                success = ConfigurationManager.AppSettings.Get("MessageEmail");
             }
             error = "Email chưa được đăng ký";
             ViewBag.success = success;

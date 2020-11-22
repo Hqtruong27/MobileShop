@@ -1,9 +1,10 @@
-namespace Models.Migrations
+﻿namespace Models.Migrations
 {
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
+    using Models.DataModels;
 
     internal sealed class Configuration : DbMigrationsConfiguration<MobileShopContext>
     {
@@ -21,15 +22,12 @@ namespace Models.Migrations
             //  to avoid creating duplicate seed data.
             UserAdminSapmple(context);
             RoleSample(context);
-
-
         }
         private void UserAdminSapmple(MobileShopContext context)
         {
-            var administator = context.Users.Any(u => u.IsAdmin == true);
-            if (administator == false)
+            if (context.Users.Count() == 0)
             {
-                context.Users.AddOrUpdate(new Models.DataModels.User { UserName = "Admin", FullName = "Hoang Truong", Email = "hqtruong27@gmail.com", Password = BCrypt.Net.BCrypt.HashPassword("111111"), Phone = "0963712001", Avatar = "", IsAdmin = true, Status = 1, mStatus = 1, isEmailVerified = true, ActiveCode = new Guid(), ResetPasswordCode = "", GroupId = null });
+                context.Users.AddOrUpdate(new User { UserId = 1, UserName = "Admin", FullName = "Truong Hoang ", Email = "hqtruong27@gmail.com", Password = BCrypt.Net.BCrypt.HashPassword("111111"), Phone = "0963712001", Avatar = "", IsAdmin = true, Status = 1, mStatus = 1, isEmailVerified = true, ActiveCode = new Guid(), ResetPasswordCode = "", GroupId = null });
                 context.SaveChanges();
             }
         }
@@ -37,10 +35,10 @@ namespace Models.Migrations
         {
             if (context.Roles.Count() == 0)
             {
-                context.Roles.AddOrUpdate(new Models.DataModels.Role { RoleId = "VIEW", RoleName = "VIEW", Status = 1 });
-                context.Roles.AddOrUpdate(new Models.DataModels.Role { RoleId = "CREATE", RoleName = "CREATE", Status = 1 });
-                context.Roles.AddOrUpdate(new Models.DataModels.Role { RoleId = "UPDATE", RoleName = "UPDATE", Status = 1 });
-                context.Roles.AddOrUpdate(new Models.DataModels.Role { RoleId = "DELETE", RoleName = "DELETE", Status = 1 });
+                context.Roles.AddOrUpdate(new Role { RoleId = "VIEW", RoleName = "VIEW", Status = 1 });
+                context.Roles.AddOrUpdate(new Role { RoleId = "CREATE", RoleName = "CREATE", Status = 1 });
+                context.Roles.AddOrUpdate(new Role { RoleId = "UPDATE", RoleName = "UPDATE", Status = 1 });
+                context.Roles.AddOrUpdate(new Role { RoleId = "DELETE", RoleName = "DELETE", Status = 1 });
                 context.SaveChanges();
             }
         }

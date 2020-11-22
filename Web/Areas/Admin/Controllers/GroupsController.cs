@@ -59,11 +59,7 @@ namespace Web.Areas.Admin.Controllers
                 await db.SaveChangesAsync();
                 mes = "Gán quyền thành công";
             }
-            return Json(new
-            {
-                StatusCode = 200,
-                Message = mes,
-            }, JsonRequestBehavior.AllowGet);
+            return Json(new { StatusCode = 200, Message = mes }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
@@ -110,11 +106,8 @@ namespace Web.Areas.Admin.Controllers
                         await db.SaveChangesAsync();
                         return RedirectToAction("ListRole", "Groups");
                     }
-                    else
-                    {
-                        ModelState.AddModelError("GroupName", "Tên Role không được trùng !");
-                        return View(g);
-                    }
+                    ModelState.AddModelError("GroupName", "Tên Role không được trùng !");
+                    return View(g);
                 }
                 catch (Exception)
                 {

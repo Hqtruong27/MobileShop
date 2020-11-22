@@ -1,4 +1,5 @@
 ﻿using Models;
+using Models.Common;
 using Models.Models.DataModels;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace Web.Areas.Admin.Controllers
         public async Task<ActionResult> Index()
         {
             User result = await db.Users.SingleOrDefaultAsync(x => x.IsAdmin == true);
-            return result == null ? RedirectToAction("Index", "Home") : (ActionResult)View();
+            return result == null ? RedirectToAction("Index", nameof(HomeController)) : (ActionResult)View();
         }
         // Json: Admin/Business/getall
         public ActionResult Getdata()
@@ -42,6 +43,7 @@ namespace Web.Areas.Admin.Controllers
             var result = await db.Businesses.FindAsync(id);
             return Json(result, JsonRequestBehavior.AllowGet);
         }
+        // JSON: Admin/Business/update controller
         [HttpPost]
         public async Task<ActionResult> EditSuccess(Business b)
         {
@@ -54,34 +56,32 @@ namespace Web.Areas.Admin.Controllers
                 await db.SaveChangesAsync();
                 return Json(new { success = "Cập nhập thành công !" }, JsonRequestBehavior.AllowGet);
             }
-            return Json(new { error = "Cập nhập thành công !" }, JsonRequestBehavior.AllowGet);
+            return Json(new { error = "Not found !!" }, JsonRequestBehavior.AllowGet);
         }
 
-        // JSON: Admin/Business/update controller
         public async Task<ActionResult> Update()
         {
-            // Lấy tất cả controller trong admin
-            var ctl = Reflection.GetAllController("Web.Areas.Admin.Controllers");
-            //Thêm vào db
-            foreach (Type item in ctl)
+            // get all controller trong admin
+            var getController = Reflection.GetAllController("Web.Areas.Admin.Controllers");
+            //add to database
+            foreach (Type item in getController)
             {
                 Business bus = new Business();
                 bus.BusinessId = item.Name.Replace("Controller", "");
-                bus.BusinessName = "Đang cập nhập...";
                 if (!await db.Businesses.AnyAsync(x => x.BusinessId == bus.BusinessId))
                 {
-                    //Nếu chưa có thỳ thêm mới
+                    if (bus.BusinessId == "Business" || bus.BusinessId == "Groups")
+                        bus.Status = 3;
+                    else
+                    //if no not have, add new
+                    if(bus.BusinessId == "Home") bus.BusinessName = "Quản lý Feedback";
+                    if(bus.BusinessId == "Cart") bus.BusinessName = "Quản lý giỏ hàng";
+                    if(bus.BusinessId == "Categories") bus.BusinessName = "Quản lý danh mục sản phẩm";
+                    if(bus.BusinessId == "News") bus.BusinessName = "Quản lý tin tức";
+                    if(bus.BusinessId == "Products") bus.BusinessName = "Quản lý sản phẩm";
+                    if(bus.BusinessId == "TypeAttr") bus.BusinessName = "Quản lý thuộc tính sản phẩm";
+                    if(bus.BusinessId == "Users") bus.BusinessName = "Quản lý nhân viên";
                     db.Businesses.Add(bus);
-                    var getBusiness = await db.Businesses.FirstOrDefaultAsync(x => x.BusinessId == "Business");
-                    var getGroups = await db.Businesses.FirstOrDefaultAsync(x => x.BusinessId == "Groups");
-                    if (getBusiness != null)
-                    {
-                        getBusiness.Status = 3;
-                    }
-                    if (getGroups != null)
-                    {
-                        getGroups.Status = 3;
-                    }
                     await db.SaveChangesAsync();
                 }
             }

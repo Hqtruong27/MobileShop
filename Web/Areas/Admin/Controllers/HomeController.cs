@@ -66,10 +66,7 @@ namespace Web.Areas.Admin.Controllers
         [AdminAuthorize(Roles = "VIEW")]
         public ActionResult FeedbackDetail(int? id)
         {
-            if (id == null)
-            {
-                return RedirectToAction("Feedback");
-            }
+            if (id == null) return RedirectToAction("Feedback");
             Feedback feedback = db.Feedbacks.Find(id);
             if (feedback == null)
             {

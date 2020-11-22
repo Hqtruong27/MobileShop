@@ -74,9 +74,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\SeedDataSample.cs" />
     <Compile Include="Migrations\202011070354152_initial.cs" />
     <Compile Include="Migrations\202011070354152_initial.Designer.cs">
       <DependentUpon>202011070354152_initial.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202011161010294_SeedData_Bussiness.cs" />
+    <Compile Include="Migrations\202011161010294_SeedData_Bussiness.Designer.cs">
+      <DependentUpon>202011161010294_SeedData_Bussiness.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="MobileShopContext.cs" />
@@ -112,6 +117,10 @@
     <EmbeddedResource Include="Migrations\202011070354152_initial.resx">
       <DependentUpon>202011070354152_initial.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011161010294_SeedData_Bussiness.resx">
+      <DependentUpon>202011161010294_SeedData_Bussiness.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

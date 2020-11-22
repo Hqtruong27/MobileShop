@@ -12,6 +12,7 @@ using Web.Areas.Admin.Models;
 using Facebook;
 using System.Configuration;
 using System.Threading.Tasks;
+using Web.Common;
 
 namespace Web.Controllers
 {
@@ -417,36 +418,6 @@ namespace Web.Controllers
         }
         #endregion
 
-        #region Send Email
-        [NonAction]
-        public void SendVerifiedLinkEmail(string email, string activeCode, string emailFor = "VerifyAccount")
-        {
-            var verifyUrl = "/Users/" + emailFor + "/" + activeCode;
-            var link = Request.Url.AbsoluteUri.Replace(Request.Url.PathAndQuery, verifyUrl);
-
-            var fromEmail = new MailAddress("c1709h@gmail.com", "ResetPassWord no-reply");
-            var toEmail = new MailAddress(email);
-            string subject = "";
-            string body = "";
-            if (emailFor == "ResetPassword")
-            {
-                subject = "Reset Password";
-                body = "<br/><br/>Đã có một yêu cầu đặt đặt lại mật khẩu web Mobile Shop" +
-            "nếu đó là bạn, vui lòng click vào link bên dưới, link sẽ tồn tại trong 24h." +
-            " <br/><br/><a href='" + link + "'>" + link + "</a>";
-            }
-
-            var smtp = new SmtpClient();
-            using (var message = new MailMessage(fromEmail, toEmail)
-            {
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = true
-            })
-                smtp.Send(message);
-        }
-        #endregion
-
         #region Forgot Password
         // POST: Users/forgot pwd
         public ActionResult ForgotPassword()
@@ -455,7 +426,7 @@ namespace Web.Controllers
         }
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult> ForgotPassword(string Email)
+        public async Task<ActionResult> ForgotPassword(string email)
         {
             if (Request.Cookies["InfoCustomer"] != null)
             {
@@ -463,23 +434,24 @@ namespace Web.Controllers
             }
             string success = "";
             string error = "";
-            var account = await db.Customers.Where(x => x.Email == Email).SingleOrDefaultAsync();
+            var account = await db.Customers.Where(x => x.Email == email).SingleOrDefaultAsync();
             if (account != null)
             {
                 //Send Email for reset pwd
-                string resetCode = Guid.NewGuid().ToString();
-                SendVerifiedLinkEmail(account.Email, resetCode, "ResetPassword");
+                var resetCode = Email.ResetCode();
                 account.ResetPasswordCode = resetCode;
-                account.ExpiredTime = DateTime.Now.AddDays(1);
+
+                var verifyUrl = "/Users/ResetPassword/" + resetCode;
+                var link = Request.Url.AbsoluteUri.Replace(Request.Url.PathAndQuery, verifyUrl);
+                Email.VerifySendEmail(account.Email, "ResetPasswordClient", link);
+
+                account.ExpiredTime = DateTime.Now.AddMinutes(15);
                 //
                 db.Configuration.ValidateOnSaveEnabled = false;
                 await db.SaveChangesAsync();
-                success = "Một email đã được gửi đến bạn, vui lòng kiểm tra hộp thư trong Email của bạn";
+                success = ConfigurationManager.AppSettings.Get("MessageEmail");
             }
-            else
-            {
-                error = "Email không hợp lệ hoặc được đăng ký";
-            }
+            error = "Email không hợp lệ hoặc được đăng ký";
             ViewBag.error = error;
             ViewBag.success = success;
             return View();
@@ -496,7 +468,7 @@ namespace Web.Controllers
 
             //verify the reset password link
             var user = await db.Customers.Where(x => x.ResetPasswordCode == id).FirstOrDefaultAsync();
-            if (user == null) return RedirectToAction("Index", "Home");
+            if (user == null) return RedirectToAction("Index", nameof(HomeController));
             if (user.ExpiredTime < DateTime.Now)
             {
                 user.ResetPasswordCode = "";
@@ -504,8 +476,7 @@ namespace Web.Controllers
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index", "Home");
             }
-            ResetPasswordModel model = new ResetPasswordModel();
-            model.ResetCode = id;
+            var model = new ResetPasswordModel() { ResetCode = id };
             return View(model);
         }
         [HttpPost]
@@ -537,10 +508,7 @@ namespace Web.Controllers
                     success = "Mật khẩu mới đã được thay đổi thành công, hãy thử ";
                     ViewBag.success = success;
                 }
-                else
-                {
-                    return RedirectToAction("Index", "Home");
-                }
+                return RedirectToAction("Index", "Home");
             }
             return View(model);
         }
@@ -552,7 +520,6 @@ namespace Web.Controllers
         {
             return View();
         }
-
 
         // View Partial: Users/right header
         public PartialViewResult RightHeader()

@@ -9,7 +9,6 @@ namespace Web.Areas.Admin.Models
 {
     public  class Reflection
     {
-        
         public static List<Type> GetAllController(string namespaces)
         {
          Assembly asm = Assembly.GetExecutingAssembly();
